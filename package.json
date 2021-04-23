@@ -1,0 +1,14 @@
+{
+  "name": "geekb_fe_training_camp_10th",
+  "version": "1.0.0",
+  "description": "simulate browser's behavior",
+  "main": "client.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
