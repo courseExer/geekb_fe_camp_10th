@@ -22,6 +22,8 @@ export class TextHtml {
       name: "",
       value: "",
     };
+    this.stack = [{ type: "document", children: [] }];
+    this.currentTextNode = null;
   }
   parse(str) {
     for (let char of str) {
@@ -30,7 +32,42 @@ export class TextHtml {
     this.FSM = this.FSM(EOF); // ?
   }
   emit(token) {
-    console.log(token);
+    if (token._type === "text") return;
+    let top = this.stack[this.stack.length - 1];
+
+    if (token._type === "startTag") {
+      let element = {
+        type: "element",
+        children: [],
+        attributes: [],
+      };
+      element.tagName = token._tagName;
+
+      for (let p in token) {
+        if (p !== "_type" || p !== "_tagName") {
+          element.attributes.push({
+            name: p,
+            value: token[p],
+          });
+        }
+      }
+
+      top.children.push(element);
+      element.parent = top;
+
+      if (!token._isSelfClosing) {
+        this.stack.push(element);
+      }
+
+      this.currentTextNode = null;
+    } else if (token._type === "endTag") {
+      if (top.tagName !== token._tagName) {
+        throw new Error("Tag start end doesn't match!");
+      } else {
+        this.stack.pop();
+      }
+      this.currentTextNode = null;
+    }
   }
 }
 
