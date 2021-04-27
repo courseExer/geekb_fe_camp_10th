@@ -1,6 +1,10 @@
 import http from "http";
-import { repeater, sequencer } from "./mock.js";
-const content = sequencer(12);
+import fs from "fs";
+import path from "path";
+// import { repeater, sequencer } from "./mock/utils.js";
+
+const content = fs.readFileSync(path.resolve("server/template.html"));
+
 http
   .createServer((request, response) => {
     let body = [];

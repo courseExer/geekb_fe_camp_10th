@@ -1,4 +1,4 @@
-import { typeIs } from "../utils.js";
+import { typeIs } from "../tools/utils.js";
 import ChunkedBodyParser from "./bodyParser.js";
 
 export default class ResponseParser {
@@ -7,7 +7,7 @@ export default class ResponseParser {
     this.headerName = "";
     this.headerValue = "";
     this.bodyParser = null;
-    this.state = this.getState.call(this, "start"); // 状态机的当前状态
+    this.state = null; // 状态机状态
     this.response = {
       httpVersion: NaN,
       statusCode: NaN,
@@ -19,7 +19,10 @@ export default class ResponseParser {
   // HTTP消息的结构是由\r\n来分割的，这里要做的是拆解http结构
   // 这些字符都属于unicode基本平面（BMP）,与content-Encoding如何编码没有关系
   receive(str, callback) {
-    this.state = this.state();
+    if (this.state === null) {
+      this.state = this.getState.call(this, "start");
+      this.state = this.state();
+    }
     for (let index = 0; index < str.length; index++) {
       const char = str.charAt(index);
       this.state = this.state(char, callback);
