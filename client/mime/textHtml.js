@@ -1,27 +1,29 @@
-/* todo
- * 当前还没有涉及：
- * - <!DOCTYPE html>,comment,fragments,script,noscript,
- * - 字符的转义或转化
+/* Description
+ * 之所以使用class来封装text/html解析器是因为，考虑到后续如果要做成流式输出的话，会一个html的内容分多次调用parse，而实例能够保存状态
+ */
+/* TODO
+ * - 规范中识别 DOCTYPE/document,comment,fragments,script,noscript,Text相关
  */
 
 const EOF = Symbol("EOF"); // EOF: End Of File
 
-/* html规范中定义好了状态机
- * https://html.spec.whatwg.org/multipage/#toc-syntax
- */
 export class TextHtml {
   constructor() {
+    /* 以下为词法分析相关 */
     this.FSM = data;
+    // currentTagToken
     // 属性加下划线前缀，避免和attributeName冲突
     this.currentToken = {
       _type: "",
       _tagName: "",
       _isSelfClosing: false,
+      _content: "",
     };
     this.currentAttribute = {
       name: "",
       value: "",
     };
+    /* 以下为语法分析相关 */
     this.stack = [{ type: "document", children: [] }];
     this.currentTextNode = null;
   }
@@ -29,10 +31,10 @@ export class TextHtml {
     for (let char of str) {
       this.FSM = this.FSM.call(this, char);
     }
-    this.FSM = this.FSM(EOF); // ?
+    this.FSM = this.FSM(EOF); // 人为结束
+    return this.stack[0];
   }
   emit(token) {
-    if (token._type === "text") return;
     let top = this.stack[this.stack.length - 1];
 
     if (token._type === "startTag") {
@@ -44,7 +46,7 @@ export class TextHtml {
       element.tagName = token._tagName;
 
       for (let p in token) {
-        if (p !== "_type" || p !== "_tagName") {
+        if (!["_type", "_tagName"].includes(p)) {
           element.attributes.push({
             name: p,
             value: token[p],
@@ -67,35 +69,60 @@ export class TextHtml {
         this.stack.pop();
       }
       this.currentTextNode = null;
+    } else if (token._type === "text") {
+      if (this.currentTextNode === null) {
+        this.currentTextNode = {
+          type: "text",
+          content: "",
+        };
+        top.children.push(this.currentTextNode);
+      }
+      this.currentTextNode.content += token._content; // 引用修改
     }
+
   }
 }
 
-// 初始状态
+/* ==================================================
+ * html规范中定义的状态机
+ * https://html.spec.whatwg.org/multipage/#toc-syntax
+ * ==================================================
+ */
+
+// 13.2.5.1 初始状态
+// TODO:[&,NULL]
 function data(c) {
-  if (c === "<") {
-    return tagOpen;
-  }
   if (c === EOF) {
     this.emit({
-      type: "EOF",
+      _type: "EOF",
     });
-    return end; // ?
-  } else {
-    // this.emit({
-    //   type: "text",
-    //   content: c,
-    // });
-    return data;
+    return end; // 词法分析结束
+  } else if (c === "<") {
+    return tagOpen;
   }
+  this.emit({
+    _type: "text",
+    _content: c,
+  });
+  return data;
 }
 // 结束状态
 function end() {
   return end;
 }
-// 开标签
+// 13.2.5.6 开标签
+// TODO:[!,?]
 function tagOpen(c) {
-  if (c === "/") {
+  if (c === EOF) {
+    this.emit({
+      _type: "text",
+      _content: "<",
+    });
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
+  } else if (c === "/") {
     return endTagOpen;
   } else if (c.match(/^[a-zA-Z]$/) !== null) {
     this.currentToken = {
@@ -104,25 +131,45 @@ function tagOpen(c) {
     };
     return tagName.call(this, c);
   } else {
-    return;
+    this.emit({
+      _type: "text",
+      _content: "<",
+    });
+    return data.call(this, c);
   }
 }
-// 开标签结束
+// 13.2.5.7 开标签结束
+// TODO:[anythingElse]
 function endTagOpen(c) {
-  if (c.match(/^[a-zA-Z]$/) !== null) {
+  if (c === EOF) {
+    this.emit({
+      _type: "text",
+      _content: "</",
+    });
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
+  } else if (c.match(/^[a-zA-Z]$/) !== null) {
     this.currentToken = {
       _type: "endTag",
       _tagName: "",
     };
     return tagName.call(this, c);
   } else if (c === ">") {
-  } else if (c === EOF) {
+    return data;
   } else {
   }
 }
-// 标签名
+// 13.2.5.8 标签名
+// TODO:[ASCII_upper_alpha,NULL]
 function tagName(c) {
-  if (c.match(/^[\t\n\f\s]$/)) {
+  if (c === EOF) {
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
+  } else if (c.match(/^[\t\n\f\s]$/)) {
     return beforeAttributeName; // 属性名
   } else if (c === "/") {
     return selfClosingStartTag; // 自封闭标签
@@ -131,55 +178,53 @@ function tagName(c) {
     return tagName;
   } else if (c === ">") {
     this.emit(this.currentToken);
-    return data; // 开标签结束，重置状态
-  } else {
-    return tagName; // ？
-  }
-}
-// 开标签自闭合
-function selfClosingStartTag(c) {
-  if (c === ">") {
-    this.currentToken._isSelfClosing = true;
-    this.emit(this.currentToken);
     return data;
-  } else if (c === EOF) {
   } else {
+    this.currentToken._tagName += c.toLowerCase();
+    return tagName;
   }
 }
-// 属性名
+// 13.2.5.32 属性名之前
 function beforeAttributeName(c) {
   if (c.match(/^[\t\n\f\s]$/)) {
     return beforeAttributeName;
   } else if (["/", ">", EOF].includes(c)) {
     return afterAttributeName.call(this, c);
   } else if (c === "=") {
-    // error：属性名之前不应该存在等号
-  } else {
+    // error：This is an unexpected-equals-sign-before-attribute-name parse error.
     this.currentAttribute = {
       name: "",
       value: "",
     };
-    return attributeName.call(this, c);
+    return attributeName;
   }
+  this.currentAttribute = {
+    name: "",
+    value: "",
+  };
+  return attributeName.call(this, c);
 }
+// 13.2.5.33 属性名
+// TODO:[ASCII_upper_alpha,NULL]
 function attributeName(c) {
   if (c.match(/^[\t\n\f\s]$/) || ["/", ">", EOF].includes(c)) {
     return afterAttributeName.call(this, c);
   } else if (c === "=") {
     return beforeAttributeValue;
+  } else if (['"', "'", "<"].includes(c)) {
+    // This is an unexpected-character-in-attribute-name parse error.
   }
-  // ???
-  else if (c === "\u0000") {
-    // todo:return some state
-  } else if (["\\", "'", "<"].includes(c)) {
-    // todo:return some state
-  } else {
-    this.currentAttribute.name += c;
-    return attributeName;
-  }
+  this.currentAttribute.name += c;
+  return attributeName;
 }
+// 13.2.5.34 属性名后
 function afterAttributeName(c) {
-  if (c.match(/^[\t\n\f\s]$/)) {
+  if (c === EOF) {
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
+  } else if (c.match(/^[\t\n\f\s]$/)) {
     return afterAttributeName;
   } else if (c === "/") {
     return selfClosingStartTag;
@@ -189,53 +234,94 @@ function afterAttributeName(c) {
     this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
     emit(this.currentToken);
     return data;
-  } else if (c === EOF) {
-  } else {
-    this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
-    this.currentAttribute = {
-      name: "",
-      value: "",
-    };
-    return attributeName.call(this, c);
   }
+  this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
+  this.currentAttribute = {
+    name: "",
+    value: "",
+  };
+  return attributeName.call(this, c);
 }
+// 13.2.5.35 属性值前
+// 注意：[/,>,EOF]的实现，标准中是没有的
 function beforeAttributeValue(c) {
   if (c.match(/^[\t\n\f\s]$/) || ["/", ">", EOF].includes(c)) {
     return beforeAttributeValue;
   } else if (c === '"') {
-    return doubleQuotedAttributeValue;
+    return attributeValue_doubleQuoted;
   } else if (c === "'") {
-    return singleQuotedAttributeValue;
+    return attributeValue_singleQuoted;
   } else if (c === ">") {
-    // return data;
-  } else {
-    return unquotedAttributeValue.call(this, c);
+    // This is a missing-attribute-value parse error.
+    this.emit(this.currentToken);
+    return data;
   }
+  return attributeValue_unQuoted.call(this, c);
 }
-function singleQuotedAttributeValue(c) {
-  if (c === "'") {
+// 13.2.5.37 属性值单引号
+// TODO:[&,NULL,]
+function attributeValue_singleQuoted(c) {
+  if (c === EOF) {
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
+  } else if (c === "'") {
     this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
-    return afterQuotedAttributeValue;
-  } else if (c === "\u0000") {
-  } else if (c === EOF) {
-  } else {
-    this.currentAttribute.value += c;
-    return doubleQuotedAttributeValue;
+    return afterAttributeValue_quoted;
   }
+  this.currentAttribute.value += c;
+  return attributeValue_singleQuoted;
 }
-function doubleQuotedAttributeValue(c) {
-  if (c === '"') {
+// 13.2.5.36 属性值双引号
+// TODO:[&,NULL]
+function attributeValue_doubleQuoted(c) {
+  if (c === EOF) {
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
+  } else if (c === '"') {
     this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
-    return afterQuotedAttributeValue;
-  } else if (c === "\u0000") {
-  } else if (c === EOF) {
-  } else {
-    this.currentAttribute.value += c;
-    return doubleQuotedAttributeValue;
+    return afterAttributeValue_quoted;
   }
+  this.currentAttribute.value += c;
+  return attributeValue_doubleQuoted;
 }
-function afterQuotedAttributeValue(c) {
-  if (c.match(/^[\t\n\f\s]$/)) {
+// 13.2.5.38 属性值不带引号
+// TODO:[&,NULL]
+function attributeValue_unQuoted(c) {
+  if (c === EOF) {
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
+  } else if (c.match(/^[\t\n\f\s]$/)) {
+    // 标准里没有
+    this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
+    return beforeAttributeName;
+  } else if (c === "/") {
+    // 标准里没有
+    this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
+    return selfClosingStartTag;
+  } else if (c === ">") {
+    this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
+    emit(this.currentToken);
+    return data;
+  } else if (["'", '"', "<", "=", "`"]) {
+    // This is an unexpected-character-in-unquoted-attribute-value parse error.
+  }
+  this.currentAttribute.value += c;
+  return attributeValue_unQuoted;
+}
+// 13.2.5.39 属性值引号之后
+function afterAttributeValue_quoted(c) {
+  if (c === EOF) {
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
+  } else if (c.match(/^[\t\n\f\s]$/)) {
     return beforeAttributeName;
   } else if (c === "/") {
     return selfClosingStartTag;
@@ -243,28 +329,23 @@ function afterQuotedAttributeValue(c) {
     this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
     this.emit(this.currentToken);
     return data;
-  } else if (c === EOF) {
-  } else {
-    this.currentAttribute.value += c;
-    return doubleQuotedAttributeValue;
   }
+  // This is a missing-whitespace-between-attributes parse error.
+  this.currentAttribute.value += c;
+  return beforeAttributeName.call(this, c);
 }
-function unquotedAttributeValue(c) {
-  if (c.match(/^[\t\n\f\s]$/)) {
-    this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
-    return beforeAttributeName;
-  } else if (c === "/") {
-    this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
-    return selfClosingStartTag;
+// 13.2.5.40 开标签自闭合
+function selfClosingStartTag(c) {
+  if (c === EOF) {
+    this.emit({
+      _type: "EOF",
+    });
+    return end;
   } else if (c === ">") {
-    this.currentToken[this.currentAttribute.name] = this.currentAttribute.value;
-    emit(this.currentToken);
+    this.currentToken._isSelfClosing = true;
+    this.emit(this.currentToken);
     return data;
-  } else if (c === "\u0000") {
-  } else if (['"', '"', ">", "=", "`"]) {
-  } else if (c === EOF) {
   } else {
-    this.currentAttribute.value += c;
-    return unquotedAttributeValue;
+    return beforeAttributeName.call(this, c);
   }
 }
