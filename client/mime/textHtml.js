@@ -1,3 +1,4 @@
+import css from "css";
 /* Description
  * 之所以使用class来封装text/html解析器是因为，考虑到后续如果要做成流式输出的话，会一个html的内容分多次调用parse，而实例能够保存状态
  */
@@ -26,6 +27,7 @@ export class TextHtml {
     /* 以下为语法分析相关 */
     this.stack = [{ type: "document", children: [] }];
     this.currentTextNode = null;
+    this.cssRules = [];
   }
   parse(str) {
     for (let char of str) {
@@ -33,6 +35,11 @@ export class TextHtml {
     }
     this.FSM = this.FSM(EOF); // 人为结束
     return this.stack[0];
+  }
+  addCSSRules(declaration) {
+    let cssAst = css.parse(declaration);
+    // console.log(JSON.stringify(cssAst, null, "  "));
+    this.cssRules.push(...cssAst.stylesheet.rules);
   }
   emit(token) {
     let top = this.stack[this.stack.length - 1];
@@ -66,6 +73,11 @@ export class TextHtml {
       if (top.tagName !== token._tagName) {
         throw new Error("Tag start end doesn't match!");
       } else {
+        // TODO:[link外联样式表,css中的import语句]
+        if (top.tagName === "style") {
+          // TODO:[既有文本节点又有元素节点时，]
+          this.addCSSRules(top.children[0].content);
+        }
         this.stack.pop();
       }
       this.currentTextNode = null;
@@ -79,7 +91,6 @@ export class TextHtml {
       }
       this.currentTextNode.content += token._content; // 引用修改
     }
-
   }
 }
 
