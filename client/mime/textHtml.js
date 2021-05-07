@@ -41,6 +41,10 @@ export class TextHtml {
     // console.log(JSON.stringify(cssAst, null, "  "));
     this.cssRules.push(...cssAst.stylesheet.rules);
   }
+  computedCSS(element) {
+    console.log("computedCSS-this.cssRules:", this.cssRules);
+    console.log("computedCSS-element:", element);
+  }
   emit(token) {
     let top = this.stack[this.stack.length - 1];
 
@@ -60,7 +64,7 @@ export class TextHtml {
           });
         }
       }
-
+      this.computedCSS(element);
       top.children.push(element);
       element.parent = top;
 
