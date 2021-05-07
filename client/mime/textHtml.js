@@ -38,13 +38,26 @@ export class TextHtml {
   }
   addCSSRules(declaration) {
     let cssAst = css.parse(declaration);
-    // console.log(JSON.stringify(cssAst, null, "  "));
     this.cssRules.push(...cssAst.stylesheet.rules);
   }
   computedCSS(element) {
-    console.log("computedCSS-this.cssRules:", this.cssRules);
-    console.log("computedCSS-element:", element);
+    let elements = this.stack.slice().reverse();
+    if (!element.computedStyle) element.computedStyle = {};
+    for (let rule of this.cssRules) {
+      let selectorParts = rule.selectors[0].split(" ").reverse();
+      if (!this.matchSelectorPart(element, selectorParts[0])) continue;
+      let matched = false,
+        j = 1;
+      for (let i = 0; i < elements.length; i++) {
+        if (this.matchSelectorPart(elements[i], selectorParts[j])) j++;
+      }
+      if (j >= selectorParts.length) matched = true;
+      if (matched) {
+        console.log("匹配到的元素：", element, "\n匹配到到规则:", rule);
+      }
+    }
   }
+  matchSelectorPart(element, selectorPart) {}
   emit(token) {
     let top = this.stack[this.stack.length - 1];
 
