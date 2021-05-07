@@ -53,7 +53,14 @@ export class TextHtml {
       }
       if (j >= selectorParts.length) matched = true;
       if (matched) {
-        console.log("匹配到的元素：", element, "\n匹配到到规则:", rule);
+        // console.log("匹配到的元素：", element, "\n匹配到到规则:", rule);
+        let computedStyle = element.computedStyle;
+        for (let declaration of rule.declarations) {
+          if (!computedStyle[declaration.property])
+            computedStyle[declaration.property] = {};
+          computedStyle[declaration.property].value = declaration.value;
+        }
+        console.log("element.computedStyle:", element.computedStyle);
       }
     }
   }
