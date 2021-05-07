@@ -57,7 +57,20 @@ export class TextHtml {
       }
     }
   }
-  matchSelectorPart(element, selectorPart) {}
+  // selector当前只考虑简单选择器的情况：class选择器、id选择器、标签选择器
+  matchSelectorPart(element, selector) {
+    if (!selector || !element.attributes) return false;
+    if (selector.charAt(0) === "#") {
+      let attr = element.attributes.filter((attr) => attr.name === "id")[0];
+      if (attr && attr.value === selector.replace("#", "")) return true;
+    } else if (selector.charAt(0) === ".") {
+      let attr = element.attributes.filter((attr) => attr.name === "class")[0];
+      if (attr && attr.value === selector.replace(".", "")) return true;
+    } else {
+      if (element.tagName === selector) return true;
+    }
+    return false;
+  }
   emit(token) {
     let top = this.stack[this.stack.length - 1];
 
