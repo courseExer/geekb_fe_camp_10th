@@ -54,11 +54,21 @@ export class TextHtml {
       if (j >= selectorParts.length) matched = true;
       if (matched) {
         // console.log("匹配到的元素：", element, "\n匹配到到规则:", rule);
+        let sp = this.specificity(rule.selectors[0]);
         let computedStyle = element.computedStyle;
         for (let declaration of rule.declarations) {
           if (!computedStyle[declaration.property])
             computedStyle[declaration.property] = {};
-          computedStyle[declaration.property].value = declaration.value;
+          if (!computedStyle[declaration.property].specificity) {
+            computedStyle[declaration.property].value = declaration.value;
+            computedStyle[declaration.property].specificity = sp;
+          } else if (
+            this.compare(computedStyle[declaration.property].specificity, sp) <
+            0
+          ) {
+            computedStyle[declaration.property].value = declaration.value;
+            computedStyle[declaration.property].specificity = sp;
+          }
         }
         console.log("element.computedStyle:", element.computedStyle);
       }
@@ -77,6 +87,34 @@ export class TextHtml {
       if (element.tagName === selector) return true;
     }
     return false;
+  }
+  // 当前没有实现复合选择器的算法
+  specificity(selector) {
+    let p = [0, 0, 0, 0];
+    let selectorParts = selector.split(" ");
+    for (let part of selectorParts) {
+      if (part.charAt(0) === "#") {
+        p[1] += 1;
+      } else if (part.charAt(0) === ".") {
+        p[2] += 1;
+      } else {
+        p[3] += 1;
+      }
+    }
+    return p;
+  }
+  // 比较specificity的大小
+  compare(sp1, sp2) {
+    if (sp1[0] - sp2[0]) {
+      return sp1[0] - sp2[0];
+    }
+    if (sp1[1] - sp2[1]) {
+      return sp1[1] - sp2[1];
+    }
+    if (sp1[2] - sp2[2]) {
+      return sp1[2] - sp2[2];
+    }
+    return sp1[3] - sp2[3];
   }
   emit(token) {
     let top = this.stack[this.stack.length - 1];
