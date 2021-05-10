@@ -81,6 +81,65 @@ export default function layout(element) {
     crossBase = 0;
     crossSign = 1;
   }
+
+  // 以下实现分行算法
+
+  // 元素都能排进同一行中的情况：
+  // 父元素未设置主轴属性,那么就由子元素把它撑开
+  let isAutoMainSize = false;
+  if (!style[mainSize]) {
+    elementStyle[mainSize] = 0;
+    // 把主轴的size加起来
+    for (let i = 0; i < items.length; i++) {
+      let item = items[i];
+      let itemStyle = getStyle(item);
+      if (itemStyle[mainSize] !== null || itemStyle[mainSize] !== void 0) {
+        elementStyle[mainSize] = elementStyle[mainSize] + itemStyle[mainSize];
+      }
+    }
+    isAutoMainSize = true;
+  }
+
+  let flexLine = [];
+  let flexLines = [flexLine];
+  let mainSpace = elementStyle[mainSize];
+  let crossSpace = 0;
+
+  for (let i = 0; i < items.length; i++) {
+    let item = items[i];
+    let itemStyle = getStyle(item);
+    if (itemStyle[mainSize] === null) itemStyle[mainSize] = 0;
+    if (itemStyle.flex) {
+      flexLine.push(item);
+    } else if (style.flexWrap === "nowrap" && isAutoMainSize) {
+      mainSpace -= itemStyle[mainSize];
+      if (itemStyle[crossSize] !== null && itemStyle[crossSize] !== void 0) {
+        crossSpace = Math.max(crossSpace, itemStyle[crossSize]);
+        flexLine.push(item);
+      }
+    } else {
+      if (itemStyle[mainSize] > style[mainSize]) {
+        itemStyle[mainSize] = style[mainSize];
+      }
+      if (mainSpace < itemStyle[mainSize]) {
+        flexLine.mainSpace = mainSpace;
+        flexLine.crossSpace = crossSpace;
+        flexLine = [];
+        flexLines.push(flexLines);
+        flesLine.push(item);
+        mainSpace = style[mainSize];
+        crossSpace = 0;
+      } else {
+        flexLine.push(item);
+      }
+      if (itemStyle[crossSize] !== null && itemStyle[crossSize] !== void 0) {
+        crossSpace = Math.max(crossSpace, itemStyle[crossSize]);
+      }
+      mainSpace -= itemStyle[mainSize];
+    }
+  }
+  flexLine.mainSpace = mainSpace;
+  console.log(items);
 }
 
 function getStyle(element) {
