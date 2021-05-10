@@ -73,7 +73,7 @@ export default function layout(element) {
     crossStart = "left";
     crossEnd = "right";
   } else if (style.flexDirection === "wrap-reverse") {
-    let temp = corssStart;
+    let temp = crossStart;
     crossStart = crossEnd;
     crossEnd = temp;
     crossSign = -1;
@@ -82,10 +82,9 @@ export default function layout(element) {
     crossSign = 1;
   }
 
-  // 以下实现分行算法
+  // === 以下实现分行算法 ===
 
-  // 元素都能排进同一行中的情况：
-  // 父元素未设置主轴属性,那么就由子元素把它撑开
+  // 元素都能排进同一行中的情况：若父元素未设置主轴属性,那么就由子元素把它撑开
   let isAutoMainSize = false;
   if (!style[mainSize]) {
     elementStyle[mainSize] = 0;
@@ -139,7 +138,85 @@ export default function layout(element) {
     }
   }
   flexLine.mainSpace = mainSpace;
-  console.log(items);
+  // console.log(items);
+
+  // === 以下实现主轴计算 ===
+  if (style.flexWrap === "nowrap" || isAutoMainSize) {
+    flexLine.crossSpace =
+      style[crossSize] !== void 0 ? style[crossSize] : crossSpace;
+  } else {
+    flexLine.crossSpace = crossSpace;
+  }
+
+  if (mainSpace < 0) {
+    // overflow(happens only if container is single line),scale every item
+    let scale = style[mainSize] / (style[mainSize] - mainSpace);
+    let currentMain = mainBase;
+    for (let i = 0; i < items.length; i++) {
+      let item = items[i];
+      let itemStyle = getStyle(item);
+      if (itemStyle.flex) itemStyle[mainSize] = 0;
+      itemStyle[mainSize] = itemStyle[mainSize] * scale;
+      itemStyle[mainStrt] = currentMain;
+      itemStyle[mainEnd] =
+        itemStyle[mainStart] + mainSign * itemStyle[mainSize];
+      currentMain = itemStyle[mainEnd];
+    }
+  } else {
+    // process each flex line
+    flexLines.forEach((item) => {
+      let mainSpace = items.mainSpace;
+      let flexTotal = 0;
+      for (let i = 0; i < items.length; i++) {
+        let item = items[i];
+        let itemStyle = getStyle(item);
+        if (itemStyle.flex !== null && itemStyle.flex !== void 0) {
+          flexTotal += itemStyle.flex;
+          continue;
+        }
+      }
+      if (flexTotal > 0) {
+        // there is flexible flex items
+        let currentMain = mainBase;
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i];
+          let itemStyle = getStyle(item);
+          if (itemStyle.flex)
+            itemStyle[mainSize] = (mainSpace / flexTotal) * itemStyle.flex;
+          itemStyle[mainStart] = currentMain;
+          itemStyle[mainEnd] =
+            itemStyle[mainStart] + mainSign * itemStyle[mainSize];
+          currentMain = itemStyle[mainEnd];
+        }
+      } else {
+        // there is *No* flexible flex items,which mean,justifyContent should work
+        let currentMain, step;
+        if (style.justifyContent === "flex-start") {
+          currentMain = mainBase;
+          step = 0;
+        } else if (style.justifyContent === "flex-end") {
+          currentMain = mainSpace * mainSign + mainBase;
+          step = 0;
+        } else if (style.justifyContent === "center") {
+          step = (mainSpace / (items.length - 1)) * mainSign;
+        } else if (style.justifyContent === "space-between") {
+          step = (mainSpace / (items.length - 1)) * mainSign;
+          currentMain = mainBase;
+        } else if (style.justifyContent === "space-around") {
+          step = (mainSpace / items.length) * mainSign;
+          currentMain = step / 2 + mainBase;
+        }
+        for (let i = 0; i < items.length; i++) {
+          let item = items[i];
+          let itemStyle = getStyle(item);
+          itemStyle[mainStart] = currentMain;
+          itemStyle[mainEnd] =
+            itemStyle[mainStart] + mainSign * itemStyle[mainSize];
+          currentMain = itemStyle[mainEnd] + step;
+        }
+      }
+    });
+  }
 }
 
 function getStyle(element) {
