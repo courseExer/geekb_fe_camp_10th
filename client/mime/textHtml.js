@@ -1,4 +1,5 @@
 import css from "css";
+import layout from "../layout.js";
 /* Description
  * 之所以使用class来封装text/html解析器是因为，考虑到后续如果要做成流式输出的话，会一个html的内容分多次调用parse，而实例能够保存状态
  */
@@ -153,6 +154,7 @@ export class TextHtml {
           // TODO:[既有文本节点又有元素节点时，]
           this.addCSSRules(top.children[0].content);
         }
+        layout(top);
         this.stack.pop();
       }
       this.currentTextNode = null;
