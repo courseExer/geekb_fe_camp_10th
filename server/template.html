@@ -5,24 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
-      body div {
+      #container {
         display: flex;
+        width: 500px;
+        height: 300px;
+        background-color: rgb(255, 255, 255);
       }
-      body div img {
-        width: 300px;
-        color: red;
+      #container #myid {
+        width: 200px;
+        height: 100px;
+        background-color: rgb(255, 0, 0);
       }
-      body div #image {
-        width: 400px;
-        color: green;
+      #container .c1 {
+        flex: 1;
+        width:100px;
+        height: 100px;
+        background-color: rgb(0, 255, 0);
       }
     </style>
   </head>
   <body>
-    <div>
-      <img id="image" />
-      <img />
-      <input type="text" />
+    <div id="container">
+      <div id="myid">myid</div>
+      <div class="c1">c1</div>
     </div>
   </body>
 </html>

@@ -1,5 +1,7 @@
+import images from "images";
 import Request from "./client/Request.js";
 import { TextHtml } from "./client/contentParser.js";
+import render from "./client/render.js";
 
 void (async function () {
   let request = new Request({
@@ -23,5 +25,8 @@ void (async function () {
   // console.log(":::client,response:::", response);
   const htmlParser = new TextHtml();
   let dom = htmlParser.parse(response.body);
-  // console.log(dom);
+
+  let viewport = images(800, 600);
+  render(viewport, dom.children[0]);
+  viewport.save("viewport.jpg");
 })();
