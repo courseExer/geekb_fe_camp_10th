@@ -21,7 +21,63 @@ function scan(clip) {
         types.push(regexp.sourceMap.get(index));
       }
     });
-    result.push({ matched, types });
+
+    let data = {};
+    if (types.includes("WhiteSpace")) {
+      continue;
+    } else if (types.includes("LineTerminator")) {
+      continue;
+    } else if (types.includes("Comment")) {
+      continue;
+    } else if (types.includes("NumericLiteral")) {
+      const index = types.indexOf("NumericLiteral");
+      data = {
+        type: "NumericLiteral",
+        value: token[index],
+      };
+    } else if (types.includes("BooleanLiteral")) {
+      const index = types.indexOf("BooleanLiteral");
+      data = {
+        type: "BooleanLiteral",
+        value: token[index],
+      };
+    } else if (types.includes("StringLiteral")) {
+      const index = types.indexOf("StringLiteral");
+      data = {
+        type: "StringLiteral",
+        value: token[index],
+      };
+    } else if (types.includes("NullLiteral")) {
+      data = {
+        type: "NullLiteral",
+        value: null,
+      };
+    } else if (types.includes("Identifier")) {
+      const index = types.indexOf("Identifier");
+      data = {
+        type: "Identifier",
+        value: token[index],
+      };
+    } else if (types.includes("Keywords")) {
+      const index = types.indexOf("Keywords");
+      data = {
+        name: "Keywords",
+        token,
+        index,
+        type: token[index],
+      };
+    } else if (types.includes("Punctuator")) {
+      const index = types.indexOf("Punctuator");
+      data = {
+        name: "Punctuator",
+        type: token[index],
+      };
+    } else {
+      console.log(token);
+      throw new Error("unexpected token:", token);
+      continue;
+    }
+    result.push(data);
   }
   return result;
 }

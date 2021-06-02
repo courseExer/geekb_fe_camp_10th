@@ -1,0 +1,315 @@
+(* 说明：
+目标：白话版的正则表达式
+为避免toy-js的复杂度，将为Lite级别
+暂时除去如下分支：
+  - RegularExpressionLiteral
+  - Template
+简化标准中产生式中递归的表述（因为下一步的实现中，使用递归替换正则表达式（当作产生式）中的关键字时无法解决（待完成）
+  - DecimalDigits --> {DecimalDigit}
+ *)
+
+
+InputElement::=
+  WhiteSpace|
+  LineTerminator|
+  Comment|
+  CommonToken
+
+WhiteSpace::=
+  <TAB>|
+  <VT>|
+  <FF>|
+  <SP>|
+  <NBSP>|
+  <ZWNBSP>|
+  <USP>
+
+LineTerminator::=
+  <LF>|
+  <CR>|
+  <LS>|
+  <PS>
+
+LineTerminatorSequence::=
+  <LF>|
+  <CR>[lookahead ≠ <LF>]|
+  <LS>|
+  <PS>|
+  <CR><LF>
+
+Comment::= SingleLineComment | MultipleLineComment
+SingleLineComment::= (? like "/" "/"{<any>} ?)
+MultipleLineComment::= (? like /* {<any>} */?)
+
+(* ！！ *)
+CommonToken::=  Keywords | Punctuator | IdentifierName | Literal
+
+(* ！*)
+Keywords::= 
+  "await"|
+  "break"|
+  "case"|
+  "catch"|
+  "class"|
+  "const"|
+  "continue"|
+  "debugger"|
+  "default"|
+  "delete"|
+  "do"|
+  "else"|
+  "enum"|
+  "export"|
+  "extends"|
+  "false"|
+  "finally"|
+  "for"|
+  "function"|
+  "if"|
+  "import"|
+  "in"|
+  "instance"|
+  "of"|
+  "new"|
+  "null"|
+  "return"|
+  "super"|
+  "switch"|
+  "this"|
+  "throw"|
+  "true"|
+  "try"|
+  "typeof"|
+  "var"|
+  "void"|
+  "while"|
+  "with"|
+  "yield"
+
+(* ！*)
+Punctuator::=
+  OptionalChainingPunctuator|
+  OtherPunctuator
+
+OptionalChainingPunctuator::=
+  "?." [lookahead ∉ DecimalDigit]
+
+OtherPunctuator::=
+  "{"|
+  "}"|
+  "("|
+  ")"|
+  "["|
+  "]"|
+  "."|
+  "..."|
+  ";"|
+  ","|
+  "<"|
+  ">"|
+  "<="|
+  ">="|
+  "=="|
+  "!="|
+  "==="|
+  "!=="|
+  "+"|
+  "-"|
+  "*"|
+  "/"|
+  "/="|
+  "%"|
+  "**"|
+  "++"|
+  "--"|
+  "<<"|
+  ">>"|
+  ">>>"|
+  "&"|
+  "|"|
+  "^"|
+  "!"|
+  "~"|
+  "&&"|
+  "||"|
+  "??"|
+  "?"|
+  ":"|
+  "="|
+  "+="|
+  "-="|
+  "*="|
+  "%="|
+  "**="|
+  "<<="|
+  ">>="|
+  ">>>="|
+  "&="|
+  "|="|
+  "^="|
+  "=>"
+
+(* ！*)
+IdentifierName::=
+  IdentifierStart|
+  IdentifierName IdentifierPart
+
+IdentifierStart::=
+  UnicodeIDStart|
+  "$"|
+  "_"|
+  \UnicodeEscapeSequence
+
+IdentifierPart::=
+  UnicodeIDContinue|
+  "$"|
+  \UnicodeEscapeSequence|
+  <ZWNJ>|
+  <ZWJ>
+
+UnicodeIDStart::=
+  (? any Unicode code point with the Unicode property “ID_Start” ?)
+UnicodeIDContinue::=
+  (? any Unicode code point with the Unicode property “ID_Continue” ?)
+
+(* ！*)
+Literal::=BooleanLiteral | NullLiteral | StringLiteral | NumericLiteral
+
+(* 布尔字面量 *)
+BooleanLiteral::=
+  "true"|
+  "false"
+(* Null字面量 *)
+NullLiteral::="null"
+(* 字符串字面量 *)
+StringLiteral::=
+  '"' [DoubleStringCharacters] '"'
+  "'" [SingleStringCharacters] "'"
+
+DoubleStringCharacters::=
+  DoubleStringCharacter [DoubleStringCharacters]
+
+SingleStringCharacters::=
+  SingleStringCharacter [SingleStringCharacters]
+
+DoubleStringCharacter::= 
+  (? SourceCharacter but not one of '"' or \ or LineTerminator ?)|
+  <LS>|
+  <PS>|
+  \EscapeSequence|
+  LineContinuation
+
+SingleStringCharacter::=
+  (? SourceCharacterbut not one of "'" or \ or LineTerminator ?)|
+  <LS>|
+  <PS>|
+  \EscapeSequence|
+  LineContinuation
+
+LineContinuation::=
+  \LineTerminatorSequence
+
+EscapeSequence::=
+  CharacterEscapeSequence|
+  "0" [lookahead ∉ DecimalDigit]|
+  HexEscapeSequence|
+  UnicodeEscapeSequence
+
+CharacterEscapeSequence::=
+  SingleEscapeCharacter|
+  NonEscapeCharacter
+
+SingleEscapeCharacter::=(? one-of '"\bfnrtv ?)
+
+NonEscapeCharacter::
+  (? SourceCharacterbut not one of EscapeCharacter or LineTerminator ?)
+
+EscapeCharacter::=
+  SingleEscapeCharacter|
+  DecimalDigit|
+  "x"|
+  "u"
+
+HexEscapeSequence::=
+  "x" HexDigit HexDigit
+
+UnicodeEscapeSequence::=
+  "u" Hex4Digits|
+  "u" "{" CodePoint "}"
+
+Hex4Digits::=
+  HexDigit HexDigit HexDigit HexDigit
+
+(* Number字面量 *)
+NumericLiteral::=
+  DecimalLiteral|
+  DecimalBigIntegerLiteral|
+  NonDecimalIntegerLiteral|
+  NonDecimalIntegerLiteral BigIntLiteralSuffix
+
+DecimalBigIntegerLiteral::=
+  "0" BigIntLiteralSuffix|
+  NonZeroDigit [DecimalDigits] BigIntLiteralSuffix
+
+NonDecimalIntegerLiteral::=
+  BinaryIntegerLiteral|
+  OctalIntegerLiteral|
+  HexIntegerLiteral
+
+BigIntLiteralSuffix::="n"
+
+DecimalLiteral::=
+  DecimalIntegerLiteral "." [DecimalDigits] [ExponentPart]|
+  "." DecimalDigits [ExponentPart]|
+  DecimalIntegerLiteral [ExponentPart]
+
+DecimalIntegerLiteral::=
+  "0"|
+  NonZeroDigit [DecimalDigits]
+
+DecimalDigits::=
+  DecimalDigit|
+  DecimalDigits DecimalDigit
+
+DecimalDigit::=(? one-of 0123456789?)
+NonZeroDigit::=(? one-of 123456789?)
+
+ExponentPart::=
+  ExponentIndicator SignedInteger
+
+ExponentIndicator::=(? one-of e E ?)
+
+SignedInteger::=
+  DecimalDigits|
+  "+" DecimalDigits|
+  "-"
+
+BinaryIntegerLiteral::=
+  "0b" BinaryDigits|
+  "0B"
+
+BinaryDigits::=
+  BinaryDigit|
+  BinaryDigits BinaryDigit
+
+BinaryDigit::=(? one-of 0 1 ?)
+
+OctalIntegerLiteral::=
+  "0o" OctalDigits|
+  “0O” OctalDigits
+
+OctalDigits::=
+  OctalDigit｜
+  OctalDigits OctalDigit
+
+OctalDigit::=（? one-of 01234567 ?)
+
+HexIntegerLiteral::= 
+  "0x" HexDigits|
+  "0X" HexDigits
+
+HexDigits::=
+  HexDigit|
+  HexDigitsHexDigit
+
+HexDigit::=(? one-of 0123456789abcdefABCDEF ?)

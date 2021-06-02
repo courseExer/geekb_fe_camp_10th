@@ -1,0 +1,381 @@
+(* 根节点 *)
+SourceCharacter::=
+  (? any Unicode code point ?)
+
+InputElementDiv::=
+  InputElementCommon|
+  DivPunctuator|
+  RightBracePunctuator
+
+InputElementRegExp::=
+  InputElementCommon|
+  RightBracePunctuator|
+  RegularExpressionLiteral
+
+InputElementRegExpOrTemplateTail::=
+  InputElementCommon|
+  RegularExpressionLiteral|
+  TemplateSubstitutionTail
+
+InputElementTemplateTail::
+  InputElementCommon|
+  DivPunctuator|
+  TemplateSubstitutionTail
+
+InputElementCommon::=
+  WhiteSpace|
+  LineTerminator|
+  Comment|
+  CommonToken
+
+
+(* ====== *)
+WhiteSpace::=
+  <TAB>|
+  <VT>|
+  <FF>|
+  <SP>|
+  <NBSP>|
+  <ZWNBSP>|
+  <USP>
+LineTerminator::=
+  <LF>|
+  <CR>|
+  <LS>|
+  <PS>
+LineTerminatorSequence::=
+  <LF>|
+  <CR>[lookahead ≠ <LF>]|
+  <LS>|
+  <PS>|
+  <CR><LF>
+
+Comment::=
+  MultiLineComment|
+  SingleLineComment
+
+(* 此处省略comment的若干产生式 *)
+
+CommonToken::=
+  IdentifierName|
+  Punctuator|
+  NumericLiteral|
+  StringLiteral|
+  Template
+
+IdentifierName::=
+  IdentifierStart|
+  IdentifierName IdentifierPart
+
+IdentifierStart::=
+  UnicodeIDStart|
+  "$"|
+  "_"|
+  \UnicodeEscapeSequence
+
+IdentifierPart::=
+  UnicodeIDContinue|
+  "$"|
+  \UnicodeEscapeSequence|
+  <ZWNJ>|
+  <ZWJ>
+
+UnicodeIDStart::=
+  (? any Unicode code point with the Unicode property “ID_Start” ?)
+UnicodeIDContinue::=
+  (? any Unicode code point with the Unicode property “ID_Continue” ?)
+
+ReservedWord::=
+  "await"|
+  "break"|
+  "case"|
+  "catch"|
+  "class"|
+  "const"|
+  "continue"|
+  "debugger"|
+  "default"|
+  "delete"|
+  "do"|
+  "else"|
+  "enum"|
+  "export"|
+  "extends"|
+  "false"|
+  "finally"|
+  "for"|
+  "function"|
+  "if"|
+  "import"|
+  "in"|
+  "instance"|
+  "of"|
+  "new"|
+  "null"|
+  "return"|
+  "super"|
+  "switch"|
+  "this"|
+  "throw"|
+  "true"|
+  "try"|
+  "typeof"|
+  "var"|
+  "void"|
+  "while"|
+  "with"|
+  "yield"
+
+Punctuator::=
+  OptionalChainingPunctuator|
+  OtherPunctuator
+
+OptionalChainingPunctuator::=
+  "?." [lookahead ∉ DecimalDigit]
+
+OtherPunctuator::=
+  "{"|
+  "("|
+  ")"|
+  "["|
+  "]"|
+  "."|
+  "..."|
+  ";"|
+  ","|
+  "<"|
+  ">"|
+  "<="|
+  ">="|
+  "=="|
+  "!="|
+  "==="|
+  "!=="|
+  "+"|
+  "-"|
+  "*"|
+  "%"|
+  "**"|
+  "++"|
+  "--"|
+  "<<"|
+  ">>"|
+  ">>>"|
+  "&"|
+  "|"|
+  "^"|
+  "!"|
+  "~"|
+  "&&"|
+  "||"|
+  "??"|
+  "?"|
+  ":"|
+  "="|
+  "+="|
+  "-="|
+  "*="|
+  "%="|
+  "**="|
+  "<<="|
+  ">>="|
+  ">>>="|
+  "&="|
+  "|="|
+  "^="|
+  "=>"
+
+DivPunctuator::=
+  "/"
+  "/="
+
+RightBracePunctuator::="}"
+
+NullLiteral::="null"
+BooleanLiteral::=
+  "true"|
+  "false"
+
+(* ===数值=== *)
+NumericLiteral::=
+  DecimalLiteral|
+  DecimalBigIntegerLiteral|
+  NonDecimalIntegerLiteral|
+  NonDecimalIntegerLiteral BigIntLiteralSuffix
+
+DecimalBigIntegerLiteral::=
+  "0" BigIntLiteralSuffix|
+  NonZeroDigit [DecimalDigits] BigIntLiteralSuffix
+
+NonDecimalIntegerLiteral::=
+  BinaryIntegerLiteral|
+  OctalIntegerLiteral|
+  HexIntegerLiteral
+
+BigIntLiteralSuffix::="n"
+
+DecimalLiteral::=
+  DecimalIntegerLiteral "." [DecimalDigits] [ExponentPart]|
+  "." DecimalDigits [ExponentPart]|
+  DecimalIntegerLiteral [ExponentPart]
+
+DecimalIntegerLiteral::=
+  "0"|
+  NonZeroDigit [DecimalDigits]
+
+DecimalDigits::=
+  DecimalDigit|
+  DecimalDigitsDecimalDigit
+
+DecimalDigit::=(? one-of 0123456789?)
+NonZeroDigit::=(? one-of 123456789?)
+
+ExponentPart::=
+  ExponentIndicatorSignedInteger
+
+ExponentIndicator::=(? one-of e E ?)
+
+SignedInteger::=
+  DecimalDigits|
+  "+" DecimalDigits|
+  "-"
+
+BinaryIntegerLiteral::=
+  "0b" BinaryDigits|
+  "0B"
+
+BinaryDigits::=
+  BinaryDigit|
+  BinaryDigitsBinaryDigit
+
+BinaryDigit::=(? one-of 0 1 ?)
+
+OctalIntegerLiteral::=
+  "0o" OctalDigits|
+  “0O” OctalDigits
+
+OctalDigits::=
+  OctalDigit｜
+  OctalDigitsOctalDigit
+
+OctalDigit::=（? one-of 01234567 ?)
+
+HexIntegerLiteral::= 
+  "0x" HexDigits|
+  "0X" HexDigits
+
+HexDigits::=
+  HexDigit|
+  HexDigitsHexDigit
+
+HexDigit::=(? one-of 0123456789abcdefABCDEF ?)
+
+StringLiteral::=
+  '"' [DoubleStringCharacters] '"'
+  "'" [SingleStringCharacters] "'"
+
+DoubleStringCharacters::=
+  DoubleStringCharacter [DoubleStringCharacters]
+
+SingleStringCharacters::=
+  SingleStringCharacter [SingleStringCharacters]
+
+DoubleStringCharacter::= 
+  (? SourceCharacter but not one of '"' or \ or LineTerminator ?)|
+  <LS>|
+  <PS>|
+  \EscapeSequence|
+  LineContinuation
+
+SingleStringCharacter::=
+  (? SourceCharacterbut not one of "'" or \ or LineTerminator ?)|
+  <LS>|
+  <PS>|
+  \EscapeSequence|
+  LineContinuation
+
+LineContinuation::=
+  \LineTerminatorSequence
+
+EscapeSequence::=
+  CharacterEscapeSequence|
+  "0" [lookahead ∉ DecimalDigit]|
+  HexEscapeSequence|
+  UnicodeEscapeSequence
+
+CharacterEscapeSequence::=
+  SingleEscapeCharacter|
+  NonEscapeCharacter
+
+SingleEscapeCharacter::=(? one-of '"\bfnrtv ?)
+
+NonEscapeCharacter::
+  (? SourceCharacterbut not one of EscapeCharacter or LineTerminator ?)
+
+EscapeCharacter::=
+  SingleEscapeCharacter|
+  DecimalDigit|
+  "x"|
+  "u"
+
+HexEscapeSequence::=
+  "x" HexDigit HexDigit
+
+UnicodeEscapeSequence::=
+  "u" Hex4Digits
+  "u" "{" CodePoint "}"
+
+Hex4Digits::=
+  HexDigit HexDigit HexDigit HexDigit
+
+(* ===此处省略若干正则表达式的产生式=== *)
+
+(* ===模板=== *)
+Template::=
+  NoSubstitutionTemplate｜
+  TemplateHead
+
+NoSubstitutionTemplate::=
+  "`" [TemplateCharacters] "`"  
+
+TemplateHead::=
+"`" [TemplateCharacters] "${"
+
+TemplateSubstitutionTail::=
+TemplateMiddle|
+TemplateTail
+
+TemplateMiddle::=
+  "}" TemplateCharacters] "${"
+
+TemplateTail::=
+  "}" [TemplateCharacters] "`"
+
+TemplateCharacters::=
+  TemplateCharacter [TemplateCharacters]
+
+TemplateCharacter::=
+  "$" [lookahead ≠ "{"]|
+  \EscapeSequence|
+  \NotEscapeSequence|
+  LineContinuation|
+  LineTerminatorSequence|
+  (? SourceCharacterbut not one of ` or \ or $ or LineTerminator ?)
+
+NotEscapeSequence::=
+  "0" DecimalDigit|
+  (? DecimalDigitbut not 0 ?)|
+  "x" [lookahead ∉ HexDigit]|
+  "x" HexDigit[lookahead ∉ HexDigit]|
+  "u" [lookahead ∉ HexDigit][lookahead ≠ "{"]|
+  "u" HexDigit[lookahead ∉ HexDigit]|
+  "u" HexDigitHexDigit[lookahead ∉ HexDigit]|
+  "u" HexDigitHexDigitHexDigit[lookahead ∉ HexDigit]|
+  "u" "{" [lookahead ∉ HexDigit]|
+  "u" "{" NotCodePoint[lookahead ∉ HexDigit]|
+  "u" "{" CodePoint[lookahead ∉ HexDigit][lookahead ≠ "}"]
+
+NotCodePoint::= 
+  (? HexDigitsbut only if MV of HexDigits > 0x10FFFF ?)
+CodePoint::
+  (? HexDigitsbut only if MV of HexDigits ≤ 0x10FFFF ?)

@@ -16,7 +16,7 @@ const LEXICAL = {
   Comment: /<SingleLineComment>|<MultipleLineComment>/,
   SingleLineComment: /\/\/[^\n]/,
   MultipleLineComment: /\/\*(?:[^\*]|[\*][^\/])*\*\//,
-  CommonToken: /<Keywords>|<Punctuator>|<IdentifierName>|<Literal>/, // 注意顺序：Keywords要写在IdentifierName之前
+  CommonToken: /<Keywords>|<Punctuator>|<Identifier>|<Literal>/, // 注意顺序：Keywords要写在Identifier之前
   Punctuator: /<OptionalChainingPunctuator>|<OtherPunctuator>/,
   OtherPunctuator: new RegExp(
     [
@@ -35,7 +35,7 @@ const LEXICAL = {
   NullLiteral: /null/,
   StringLiteral: /["][^"\n]*["]|['][^'\n]*[']/,
   NumericLiteral: /(?:[1-9][0-9]*|0)(?:\.[0-9]*)?/,
-  IdentifierName: /[a-zA-Z_$]+[0-9a-zA-Z$_]*/,
+  Identifier: /[a-zA-Z_$]+[0-9a-zA-Z$_]*/,
   Keywords: new RegExp(
     [
       "await",
@@ -87,13 +87,17 @@ const LEXICAL = {
  * 复数的描述方式，Statement+ ---> StatementList
  */
 const SYNTAX = {
-  program: [["StatementList", "EOF"]],
+  Program: [["StatementList", "EOF"]],
   StatementList: [["Statement"], ["StatementList", "Statement"]],
   Statement: [
-    "ExpressionStatement",
-    "IfStatement",
-    "VariableDeclaration",
-    "FunctionDeclaration",
+    ["ExpressionStatement"],
+    ["IfStatement"],
+    ["WhileStatement"],
+    ["VariableDeclaration"],
+    ["FunctionDeclaration"],
+    ["Block"],
+    ["BreakStatement"],
+    ["ContinueStatement"],
   ],
   // expression
   ExpressionStatement: [["Expression", ";"]],
@@ -109,14 +113,73 @@ const SYNTAX = {
     ["MultiplicativeExpression", "/", "PrimaryExpression"],
   ],
   PrimaryExpression: [["(", "Expression", ")"], ["Literal"], ["Identifier"]],
-  Literal: [["Number"]],
+  AssignmentExpression: [
+    ["LeftHandSideExpression", "=", "LogicalORExpression"],
+    ["LogicalORExpression"],
+  ],
+  LogicalORExpression: [
+    ["LogicalANDExpression"],
+    ["LogicalORExpression", "||", "LogicalANDExpression"],
+  ],
+  LogicalANDExpression: [
+    ["AdditiveExpression"],
+    ["LogicalANDExpression", "&&", "AdditiveExpression"],
+  ],
+  LeftHandSideExpression: [["CallExpression"], ["NewExpression"]],
+  CallExpression: [
+    ["MemberExpression", "Arguments"],
+    ["CallExpression", "Arguments"],
+  ],
+  Arguments: [
+    ["(", ")"],
+    ["(", "ArgumentList", ")"],
+  ],
+  ArgumentList: [
+    ["AssignmentExpression"],
+    ["ArgumentList", ",", "AssignmentExpression"],
+  ],
+  NewExpression: [["MemberExpression"], ["new", "NewExpression"]],
+  MemberExpression: [
+    ["PrimaryExpression"],
+    ["PrimaryExpression", ".", "Identifier"],
+    ["PrimaryExpression", "[", "Expression", "]"],
+  ],
+  Literal: [
+    ["NumbericLiteral"],
+    ["StringLiteral"],
+    ["BooleanLiteral"],
+    ["NullLiteral"],
+    ["RegularExpressionLiteral"],
+    ["ObjectLiteral"],
+    ["ArrayLiteral"],
+  ],
+  ObjectLiteral: [
+    ["{", "}"],
+    ["{", "PropertyList", "}"],
+  ],
+  PropertyList: [["Property"], ["PropertyList", ",", "Property"]],
+  Property: [
+    ["StringLiteral", ":", "AdditiveExpression"],
+    ["Identifier", ":", "AdditiveExpression"],
+  ],
   // If
   IfStatement: [["If", "(", "Expression", ")", "Statement"]],
   // VariableDeclaration
-  VariableDeclaration: [["var", "Identifier"]],
+  VariableDeclaration: [
+    ["var", "Identifier", ";"],
+    ["let", "Identifier", ";"],
+    ["const", "Identifier", ";"],
+  ],
   FunctionDeclaration: [
     ["function", "Identifier", "(", ")", "{", "StatementList", "}"],
   ],
+  BreakStatement: [["break", ";"]],
+  ContinueStatement: [["continue", ";"]],
+  Block: [
+    ["{", "StatementList", "}"],
+    ["{", "}"],
+  ],
+  WhileStatement: [["while", "(", "Expression", ")", "Statement"]],
 };
 
 module.exports = {
