@@ -43,6 +43,8 @@ class XRegExp {
   }
 }
 
+// 词法分析器产出的东西叫做token
+// 改为generator后，每次返回一个迭代器iterator，这样外层就可以很容易的使用新语法for of 了
 function* scan(str) {
   const regexp = new XRegExp(
     {
@@ -52,17 +54,18 @@ function* scan(str) {
       Comments: /\/\/[^\n]*|\/\*(?:[^*]|[*][^\/])*\*\//,
       Token: "<Literal>|<Keywords>|<Identifier>|<Punctuator>",
       Literal:
-        "<NumbericLiteral>|<BooleanLiteral>|<StringLiteral>|<NullLiteral>",
-      NumbericLiteral:
+        "<NumericLiteral>|<BooleanLiteral>|<StringLiteral>|<NullLiteral>",
+      NumericLiteral:
         /0x[0-9a-zA-Z]+|0o[0-7]+|0b[01]+|(?:[1-9][0-9]*|0)(?:\.[0-9]*)?|\.[0-9]+/,
       BooleanLiteral: /true|false/,
       NullLiteral: /null/,
       StringLiteral: /["](?:[^"\n]|\\[\s\S])*["]|['](?:[^'\n]|\\[\s\S])*[']/, // 不理解\\[\s\S]
       Identifier: /[_$a-zA-Z][_$a-zA-Z0-9]*/,
-      Keywords: /continue|break|if|else|for|function|var|let|const|new|while/,
+      Keywords:
+        /continue|break|if|else|for|function|var|let|const|new|while|return/,
       Punctuator: new RegExp(
         [
-          /[\+\-\*\/\%\=]|\+\+|\-\-|\*\*/.source,
+          /[\+\*\/\%\=]|\-|\+\+|\-\-|\*\*/.source,
           /[\(\)\{\}\[\]\<\>]/.source,
           /[\,\;\^\!\~\&\?\:]/.source,
           /\+\=|\-\=|\*\=|\%\=|\&\=|\=\=|\=\=\=|\!\=|\!\=\=|\>\=|\<\=/.source,
@@ -79,9 +82,9 @@ function* scan(str) {
     if (r.Whitespace) {
     } else if (r.LineTerminator) {
     } else if (r.Comments) {
-    } else if (r.NumbericLiteral) {
+    } else if (r.NumericLiteral) {
       yield {
-        type: "NumbericLiteral",
+        type: "NumericLiteral",
         value: r[0],
       };
     } else if (r.BooleanLiteral) {
@@ -96,24 +99,31 @@ function* scan(str) {
       };
     } else if (r.NullLiteral) {
       yield {
-        type: "NumbericLiteral",
+        type: "NullLiteral",
         value: null,
       };
     } else if (r.Identifier) {
+      // 为何不沿用value而是name？？
       yield {
         type: "Identifier",
-        value: r[0],
+        name: r[0],
       };
     } else if (r.Keywords) {
+      // 每一种Keywords都是一个独立的terminal symbol
       yield {
+        // type: "Keywords",
+        // value: r[0],
         type: r[0],
       };
     } else if (r.Punctuator) {
+      // 每一种Punctuator都是一个独立的terminal symbol
       yield {
+        // type: "Punctuator",
+        // value: r[0],
         type: r[0],
       };
     } else {
-      throw new Error("unexpected token ", r[0]);
+      throw new Error("unexpected token ", JSON.stringify(r[0]));
     }
     // 退出
     if (!r[0].length) break;
