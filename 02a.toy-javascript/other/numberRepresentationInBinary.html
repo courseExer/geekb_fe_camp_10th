@@ -1,0 +1,92 @@
+<!-- 参考
+  https://zh.wikipedia.org/wiki/雙精度浮點數
+ -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="../node_modules/modern-normalize/modern-normalize.css"
+    />
+    <link rel="stylesheet" href="numberRepresentationInBinary.css" />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <h2 class="title">双精度浮点数二进制表示</h2>
+      <ul class="board" id="board"></ul>
+      <input class="ipt" value="0.13" id="ipt" />
+    </div>
+    <script>
+      const node_board = document.getElementById("board");
+      const node_ipt = document.getElementById("ipt");
+      node_ipt.addEventListener("keypress", (e) => {
+        let num = document.getElementById("ipt").value;
+        if (e.key.toLowerCase() === "enter") {
+          console.log(convert(num));
+          render(convert(num));
+        }
+      });
+      function convert(num) {
+        if (typeof +num !== "number") num = 0;
+        num = +num;
+        const sign = num >= 0 ? 0 : 1;
+        const positiveValue = sign === 0 ? num : -1 * num;
+        let [value, exponent] = positiveValue.toExponential().split("e");
+        value = +value;
+        exponent = +exponent;
+        const exponentSign = exponent >= 0 ? 0 : 1;
+        const valueBinary = positiveValue.toString(2, 10);
+        return {
+          sign,
+          exponentSign,
+          exponentBinary: (1024 + exponent).toString(2, 10),
+          valueBinary:
+            valueBinary.indexOf(".") === -1
+              ? valueBinary.slice(1)
+              : valueBinary.slice(2),
+          origin: {
+            exponent,
+            positiveValue,
+          },
+        };
+      }
+
+      function render(data) {
+        let { sign, exponentSign, exponentBinary, valueBinary, origin } = data;
+        exponentBinary = exponentBinary.padStart(11, "0");
+        valueBinary = valueBinary.padEnd(52, "0");
+        const bitCount = 64;
+        // 清空
+        node_board.innerHTML = "";
+        // 添加li
+        const fragment = document.createDocumentFragment(); // 优化显示
+        const child_br = document.createElement("br");
+        for (let i = 0; i < bitCount; i++) {
+          const child_li = document.createElement("li");
+          child_li.title = i;
+          if (i === 0) {
+            child_li.textContent = sign;
+            child_li.title += ",符号位";
+            child_li.classList.add("sign");
+          } else if (i <= 11) {
+            child_li.textContent = exponentBinary[i - 1];
+            child_li.title = ",指数位";
+            child_li.classList.add("exponent");
+          } else {
+            child_li.textContent = valueBinary[i - 12];
+            child_li.title = ",有效位";
+          }
+          if (valueBinary !== "0") child_li.classList.add("nonzero");
+          fragment.appendChild(child_li);
+          if (i === 31) fragment.appendChild(child_br);
+        }
+        node_board.appendChild(fragment);
+      }
+    </script>
+    <script src="./numberRepresentationInBinary.js"></script>
+  </body>
+</html>
