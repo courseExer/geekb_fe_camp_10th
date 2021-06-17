@@ -1,26 +1,54 @@
+body {
+  background-color: silver;
+}
 .carousel {
   width: 500px;
   height: 400px;
   margin: 0 auto;
-  border: 10px solid #0000ff;
+  border: 8px dashed purple;
   .slider {
     position: relative;
-    background-color: green;
+    transform: translate3d(0%, 0, 0);
+    outline: 2px solid red;
     height: 100%;
+    &.move {
+      transition-property: transform;
+      transition-timing-function: ease-out;
+      transition-delay: 0s;
+      transition-duration: 0.5s;
+      transform: translate3d(-100%, 0, 0);
+    }
   }
   .slide {
+    position: relative;
     width: 100%;
     height: 100%;
-    background-color: red;
+    background-image: url("../asset/resource/transparent.jpg");
+    outline: 2px solid green;
+    display: none;
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 25px;
+      height: 25px;
+      background-color: yellow;
+    }
     &.backward {
+      display: block;
       position: absolute;
       top: 0;
       right: 100%;
     }
     &.forward {
+      display: block;
       position: absolute;
       top: 0;
       left: 100%;
+    }
+    &.current {
+      display: block;
     }
     img {
       position: relative;
