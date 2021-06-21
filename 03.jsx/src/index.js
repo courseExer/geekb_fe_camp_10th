@@ -5,18 +5,18 @@ import Style from "./index.less";
 class Carousel extends Component {
   constructor() {
     super();
+    this.option = {
+      autoplay: true,
+      dragDistance: "10px", // 支持小数，像素
+      during: 3000,
+      direction: "left", // left|right
+      changeDirection: true, // 外力可以改变轮播方向
+      transitionTime: 500,
+    };
+    this.autoplay = this.option.autoplay;
+    this.direction = this.option.direction;
     this.index = 0;
     this.timer = {};
-    this.option = {
-      autoplay: false,
-      during: 3000,
-      direction: "left", // left,right
-      changeDirection: true, // 运行中外力可以改变轮播方向
-      transitionTime: 500,
-      dragDistance: "10px", // 支持小数，像素
-    };
-    this.direction = this.option.direction;
-    this.autoplay = this.option.autoplay;
   }
   create_ui() {
     // 前进和后退按钮
@@ -39,14 +39,15 @@ class Carousel extends Component {
     this.slides_update(slider);
     // appendChild
     this.root.className = "carousel";
-    // ？？重新render时元素如何解绑？？
-    // this.root.innerHTML = "";
     this.root.appendChild(slider);
     this.root.appendChild(btn_left);
     this.root.appendChild(btn_right);
 
     return this.root;
   }
+  // 根据当前序号取序号
+  // previous/-1, 向前取
+  // next/1,向后取
   getIndex(direction) {
     if (direction === "previous") direction = -1;
     if (direction === "next") direction = 1;
@@ -105,8 +106,9 @@ class Carousel extends Component {
     slider.classList.remove("move_left");
     slider.style.transition = "";
   }
-  moveHandler(direction) {
+  moveHandler(direction, type) {
     console.log("direction:", direction);
+    if (type === "automatic") this.clearTimer("autoplay");
     this.slider_animation(direction);
     this.index = this.getIndex(direction === "right" ? -1 : 1);
     console.log(this.index);
@@ -114,14 +116,21 @@ class Carousel extends Component {
     this.timer["transition"] = setTimeout(() => {
       this.slider_reset();
       this.slides_update();
-    }, 500);
+      // 自动轮播
+      if (this.autoplay) {
+        this.timer["autoplay"] = this.automatic(this.option.during);
+      }
+    }, this.option.transitionTime);
   }
   automatic(ms) {
     this.clearTimer("autoplay");
     this.timer["autoplay"] = setTimeout(() => {
       if (!this.autoplay) return;
-      this.moveHandler(this.direction);
-      this.timer["autoplay"] = this.automatic(this.option.during);
+      this.moveHandler(this.direction, "automatic");
+      // 自动轮播
+      if (this.autoplay) {
+        this.timer["autoplay"] = this.automatic(this.option.during);
+      }
     }, ms);
     return this.timer["autoplay"];
   }
@@ -129,12 +138,12 @@ class Carousel extends Component {
     // ===按钮===
     this.root
       .getElementsByClassName("btn_left")[0]
-      .addEventListener("click", () => this.moveHandler("right"));
+      .addEventListener("click", (e) => this.moveHandler("right"));
     this.root
       .getElementsByClassName("btn_right")[0]
-      .addEventListener("click", () => this.moveHandler("left"));
+      .addEventListener("click", (e) => this.moveHandler("left"));
     // ===鼠标拖拽===
-    let pos_beg = {};
+    let position_begin = {};
     let offset = {};
     const mousedownHandler = (e) => {
       if (e.target.classList.contains("btn")) {
@@ -147,12 +156,12 @@ class Carousel extends Component {
       document.addEventListener("mouseup", mouseupHandler);
       document.body.style.cursor = "grabbing";
       this.root.style.cursor = "grabbing";
-      pos_beg.x = e.x;
-      pos_beg.y = e.y;
+      position_begin.x = e.x;
+      position_begin.y = e.y;
     };
     const mousemoveHandler = (e) => {
-      offset.x = e.x - pos_beg.x;
-      offset.y = e.y - pos_beg.y;
+      offset.x = e.x - position_begin.x;
+      // offset.y = e.y - position_begin.y;
       slider.style.left = offset.x + "px";
     };
     const mouseupHandler = (e) => {
@@ -168,11 +177,8 @@ class Carousel extends Component {
           : this.root.clientWidth * this.option.dragDistance;
 
       if (Math.abs(offset.x) > validOffset) {
-        if (offset.x < 0) {
-          this.moveHandler.call(this, "left");
-        } else if (offset.x > 0) {
-          this.moveHandler.call(this, "right");
-        }
+        if (this.option.changeDirection) this.direction = offset.x > 0 ? "right" : "left";
+        this.moveHandler.call(this, this.direction);
       } else {
         this.slider_reset();
       }
@@ -180,15 +186,17 @@ class Carousel extends Component {
       // 消费完毕重置
       offset.x = 0;
       offset.y = 0;
-      if (this.option.autoplay) {
-        this.timer["autoplay"] = this.automatic();
+
+      // 自动轮播
+      if (this.autoplay) {
+        this.timer["autoplay"] = this.automatic(this.option.during + 500);
       }
     };
 
     this.root.addEventListener("mousedown", mousedownHandler);
 
-    // ===自动轮播功能===
     window.onload = () => {
+      // 自动轮播
       if (this.autoplay) {
         this.timer["autoplay"] = this.automatic(this.option.during + 500);
       }
