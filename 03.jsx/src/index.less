@@ -2,21 +2,36 @@ body {
   background-color: silver;
 }
 .carousel {
-  width: 500px;
-  height: 400px;
+  position: relative;
+  width: 400px;
+  height: 300px;
   margin: 0 auto;
-  border: 8px dashed purple;
+  border: 6px dashed purple;
+  cursor: grab;
   .slider {
     position: relative;
-    transform: translate3d(0%, 0, 0);
-    outline: 2px solid red;
+    left: 0;
+    outline: 6px solid red;
     height: 100%;
-    &.move {
-      transition-property: transform;
-      transition-timing-function: ease-out;
+    &.move_back {
+      transition-property: left;
+      transition-timing-function: ease-in-out;
       transition-delay: 0s;
       transition-duration: 0.5s;
-      transform: translate3d(-100%, 0, 0);
+    }
+    &.move_left {
+      left: -100%;
+      transition-property: left;
+      transition-timing-function: ease-in-out;
+      transition-delay: 0s;
+      transition-duration: 0.5s;
+    }
+    &.move_right {
+      left: 100%;
+      transition-property: left;
+      transition-timing-function: ease-in-out;
+      transition-delay: 0s;
+      transition-duration: 0.5s;
     }
   }
   .slide {
@@ -26,6 +41,8 @@ body {
     background-image: url("../asset/resource/transparent.jpg");
     outline: 2px solid green;
     display: none;
+    user-select: none;
+      pointer-events: none;
     &::before {
       content: "";
       position: absolute;
@@ -35,13 +52,13 @@ body {
       height: 25px;
       background-color: yellow;
     }
-    &.backward {
+    &.previous {
       display: block;
       position: absolute;
       top: 0;
       right: 100%;
     }
-    &.forward {
+    &.next {
       display: block;
       position: absolute;
       top: 0;
@@ -60,6 +77,51 @@ body {
       transform: translateY(-50%);
       user-select: none;
       pointer-events: none;
+    }
+  }
+  .btn_right,
+  .btn_left {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.05);
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+    }
+  }
+  .btn_left {
+    left: 0;
+    text-align: center;
+    &::before {
+      content: "<";
+      vertical-align: middle;
+      font-size: 30px;
+      color: rgba(255, 255, 255, 0.3);
+    }
+    &::after {
+      content: "";
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
+    }
+  }
+  .btn_right {
+    right: 0;
+    text-align: center;
+    &::before {
+      content: ">";
+      vertical-align: middle;
+      font-size: 30px;
+      color: rgba(255, 255, 255, 0.3);
+    }
+    &::after {
+      content: "";
+      display: inline-block;
+      height: 100%;
+      vertical-align: middle;
     }
   }
 }
