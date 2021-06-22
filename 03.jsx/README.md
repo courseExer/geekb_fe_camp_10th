@@ -1,6 +1,6 @@
 # component system
 
-## ...
+## 完成组件的功能
 
 不在节点上监听事件而是在 document 上监听，因为鼠标拖拽时有可能离开 carousel，用户的直觉应该是继续拖动而不是戛然而止。
 现代浏览器中去监听 documnt 还有一个额外好处，就是即使鼠标离开了浏览器仍然能够监听到。这个特性能够让体验更加好。
@@ -17,12 +17,17 @@ mouseup 时有异步的 updateSlide，而 click 则没有写 updateSlide，居�
 
 autoplay执行的逻辑被分散在了各处，如何利用设计模式让代码更加集中一些呢
 
-
-## 问题
-
 当前未考虑组件的生命周期以及元素的解绑
 
 使用classname来做transition的问题主要在于：
 - transitionTime是可以配置的，但还需要传值给css变量，虽然可以通过css变量来实现，但还是js中统一处理更好些
 - 这个主要还是从使用者角度来看，如何配合更加容易落地
 后续全部用style来做吧
+
+## 封装动画
+
+使用requestAnimationFrame时我曾有个疑惑，就是动画在高刷新率的设备和低刷新率的设备上，会不会有快慢之别？
+实际上具体看你的实现了，只要时间是一致的动画的播放就不会有快慢之分，只有丝滑与否的区别。
+目标上，我们需要将startValue递增或递减到endValue
+手段上，让将时间戳差值参与计算，从startTime到startTime+durationTime
+
