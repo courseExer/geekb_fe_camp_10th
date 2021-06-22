@@ -48,17 +48,21 @@ class Carousel extends Component {
   // 根据当前序号取序号
   // previous/-1, 向前取
   // next/1,向后取
-  getIndex(direction) {
-    if (direction === "previous") direction = -1;
-    if (direction === "next") direction = 1;
-    if (direction === -1) {
-      return this.index === 0
-        ? this.attributes["src"].length - 1
-        : (this.index - 1) % this.attributes["src"].length;
-    } else if (direction === 1) {
-      return (this.index + 1) % this.attributes["src"].length;
+  getIndex(amount) {
+    amount = amount || 0;
+    if (amount === "previous") {
+      amount = -1;
+    } else if (amount === "next") {
+      amount = 1;
     }
-    return this.index;
+    if (amount >= 0) {
+      return (this.index + amount) % this.attributes["src"].length;
+    } else if (amount < 0) {
+      return (
+        (this.index + amount + this.attributes["src"].length) %
+        this.attributes["src"].length
+      );
+    }
   }
   clearTimer(name) {
     Object.keys(this.timer).forEach((item) => {
@@ -177,7 +181,8 @@ class Carousel extends Component {
           : this.root.clientWidth * this.option.dragDistance;
 
       if (Math.abs(offset.x) > validOffset) {
-        if (this.option.changeDirection) this.direction = offset.x > 0 ? "right" : "left";
+        if (this.option.changeDirection)
+          this.direction = offset.x > 0 ? "right" : "left";
         this.moveHandler.call(this, this.direction);
       } else {
         this.slider_reset();
