@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      #app {
+        margin: 0 auto;
+        width: 80%;
+        height: 80%;
+        outline: 3px dashed black;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="info"></div>
+    <script type="module">
+      import { Gesture } from "./gesture.js";
+      // console.log(gesture())
+      const gesture = new Gesture();
+      gesture.on("start", (e) => {
+        console.log(e.type);
+      });
+      gesture.on("tap", (e) => console.log(e.type));
+      gesture.on("panstart", (e) => console.log(e.type));
+      gesture.on("pan", (e) => console.log(e.type));
+      gesture.on("panend", (e) => console.log(e.type));
+      gesture.on("pressstart", (e) => console.log(e.type));
+      gesture.on("pressend", (e) => console.log(e.type));
+      gesture.on("flick", (e) => console.log(e));
+      gesture.on("cancel", (e) => console.log(e.type));
+    </script>
+  </body>
+</html>

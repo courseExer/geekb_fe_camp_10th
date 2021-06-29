@@ -14,14 +14,24 @@ const images = [
 // a.mountTo(document.getElementById("app"));
 
 let timeline = new Timeline();
+window.timeline = timeline;
 
 timeline.add(
   new Animation({
     object: {},
     property: "test",
     startValue: 0,
-    endValue: 100,
+    endValue: 50,
+    delay: 2000,
     duration: 1000,
   })
 );
-// timeline.start();
+
+timeline.start();
+
+setTimeout(() => {
+  timeline.pause();
+}, 2500);
+setTimeout(() => {
+  timeline.resume();
+}, 3500);
