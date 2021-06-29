@@ -1,4 +1,3 @@
-
 import timingFunction from "./timingFunction.js";
 const TICK = Symbol("tick"); // fn，动画机制
 const TICK_HANDLER = Symbol("tick_handler"); // number,requestAnimation的返回值
