@@ -39,8 +39,8 @@ export class Listener {
     requireEvents.forEach((eventName) => {
       if (["mousemove", "mouseup"].includes(eventName)) return;
       const bindingObject = ["mousedown", "touchstart"].includes(eventName)
-        ? document
-        : this.element;
+        ? this.element
+        : document;
       bindingObject.addEventListener(eventName, (e) =>
         this["handle_" + eventName](e)
       );
@@ -49,38 +49,36 @@ export class Listener {
       this.element.addEventListener(eventName, (e) => e.preventDefault());
     });
   }
-  normalize_event(event) {
-    let inheritor = Object.create(null);
-    inheritor["type"] = event.type;
-    inheritor["timeStamp"] = event.timeStamp;
-    inheritor["touches"] = [];
-    if (event.type.indexOf("mouse") === 0) {
-      const buttons = event.buttons
-        .toString()
-        .padStart(5, 0)
-        .split("")
-        .reverse();
-      for (let index = 0; index < buttons.length; index++) {
-        if (buttons[index] !== "1") continue;
-        inheritor["touches"].push({
+  normalize_event(e) {
+    let eventData = new Event(e.type);
+    eventData["_event"] = e;
+    eventData["touches"] = e.touches || [];
+    eventData["detail"] = {};
+    eventData["detail"]["target"] = e.target;
+    let buttonData = getMouseButton(e);
+    if (e.type.indexOf("mouse") === 0) {
+      for (let index = 0; index < buttonData.length; index++) {
+        if (buttonData[index] !== "1") continue;
+        eventData["touches"].push({
           identifier: index,
-          clientX: event.clientX,
-          clientY: event.clientY,
+          clientX: e.clientX,
+          clientY: e.clientY,
           offsetX: 0,
           offsetY: 0,
-          target: event.target,
+          target: e.target,
         });
       }
-    } else if (event.type.indexOf("touch") === 0) {
-      inheritor["touches"] = Array.prototype.map.call(
-        event.touches,
+    } else if (e.type.indexOf("touch") === 0) {
+      eventData["touches"] = Array.prototype.map.call(
+        e.touches,
         (item) => item
       );
     }
 
-    return inheritor;
+    return eventData;
   }
   handle_mousedown(e) {
+    // e.preventDefault();
     if (this.ctx.hasTouchApis) {
       this.element.removeEventListener(
         "mousedown",
@@ -124,8 +122,9 @@ export class Recognize {
     this.timeStamp = null;
   }
   handle_start(event) {
-    const { type, touches } = event;
+    const { type, touches, target } = event;
     const { getState, setState, dispatcher } = this.ctx;
+
     if (this.ctx.state !== "init") return;
     setState.call(this.ctx, "start");
     this.points = touches; // !!mutable
@@ -134,12 +133,17 @@ export class Recognize {
       setState.call(this.ctx, "pressstart");
       dispatcher.dispatch.call(this.ctx, this.ctx.state);
     }, 500);
-    dispatcher.dispatch.call(this.ctx, this.ctx.state);
+    dispatcher.dispatch.call(this.ctx, this.ctx.state, {
+      x: this.points[0].offsetX,
+      y: this.points[0].offsetY,
+      target: event.touches[0].target,
+    });
   }
   handle_move(event) {
     const { type, touches } = event;
     const { getState, setState, dispatcher } = this.ctx;
     const leafStates = ["init", "tap", "panend", "pressend", "flick", "swipe"];
+
     if (leafStates.includes(this.ctx.state)) return;
     if (this.timer["pressstart"]) {
       clearTimeout(this.timer["pressstart"]);
@@ -162,17 +166,24 @@ export class Recognize {
         debugger;
       }
     });
-    dispatcher.dispatch.call(this.ctx, this.ctx.state);
+    dispatcher.dispatch.call(this.ctx, this.ctx.state, {
+      x: this.points[0].offsetX,
+      y: this.points[0].offsetY,
+    });
+    console.log(this.points[0].offsetX, this.points[0].offsetY);
   }
   handle_end(event) {
+    const { type } = event;
     const { getState, setState, dispatcher } = this.ctx;
     let props = {};
+
     if (this.timer["pressstart"]) {
       clearTimeout(this.timer["pressstart"]);
       this.timer["pressstart"] = null;
     }
     if (this.ctx.state === "start") {
       setState.call(this.ctx, "tap");
+      props.target = event.detail.target;
     } else if (this.ctx.state === "panstart") {
       setState.call(this.ctx, "panend");
     } else if (this.ctx.state === "pan") {
@@ -232,4 +243,11 @@ export class Dispatcher {
 
 export default function factory(elm, config) {
   return new Gesture(elm, config);
+}
+
+function getMouseButton(event) {
+  if (!(event instanceof MouseEvent)) {
+    return false;
+  }
+  return event.buttons.toString().padStart(5, 0).split("").reverse();
 }
