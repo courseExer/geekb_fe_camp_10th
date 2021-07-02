@@ -1,6 +1,7 @@
 import { defaultOptions } from "./gestureDefaultConfig.js";
 import { typeIs } from "./utils.js";
-
+// Todo：
+// - 支持多触点
 export class Gesture {
   constructor(elm, config) {
     if (elm && !(elm instanceof EventTarget)) throw new Error("elm参数错误");
@@ -15,8 +16,16 @@ export class Gesture {
     this.recognize = new Recognize(this.element, this);
     this.dispatcher = new Dispatcher(this.element, this);
   }
+  // type支持数组或字符串
   on(type, callback) {
-    this.element.addEventListener(type, callback);
+    const dataType = typeIs(type);
+    if (!["string", "array"].includes(dataType))
+      throw new Error("type类型错误");
+
+    if (typeIs(type) === "string") type = [type];
+    type.forEach((t) => {
+      this.element.addEventListener(t, callback);
+    });
   }
   getState() {
     return this.state;
