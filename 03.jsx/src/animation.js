@@ -50,7 +50,7 @@ export class Timeline {
         if (time_ran < animation.duration) {
           const value = animation.receive(time_ran, this);
           const event = new Event("start");
-          event.detail = { left: value };
+          event.detail = { x: value };
           this.element.dispatchEvent(event);
         } else {
           const event = new Event("end");

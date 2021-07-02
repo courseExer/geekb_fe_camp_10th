@@ -76,4 +76,6 @@ gesture 在 pc 模式下，pan 的数量明显比 mobile 模式下要多，而�
 思考原因是：
 设备支持60fps，但仍然没有GPU加速那么的顺畅，而css默认是支持的
 
+最终使用写入`tranform:translate3d(${xxx}px,0,0)`来解决问题，一来可以像素级控制移动，二来利用css的gpu加速
+
 ## Attribute 的设计改良
