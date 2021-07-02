@@ -1,12 +1,13 @@
+import Style from "./Carousel.less";
 import { Component } from "./framework.js";
 import Gesture from "./gesture.js";
-import Style from "./Carousel.less";
+import { Timeline, Animation } from "./animation.js";
 
 export default class Carousel extends Component {
   constructor() {
     super();
     this.option = {
-      autoplay: true,
+      autoplay: false,
       dragDistance: "10px", // 支持小数，像素
       during: 3000,
       direction: "left", // left|right
@@ -19,8 +20,10 @@ export default class Carousel extends Component {
     this.index = 0;
     this.timer = {};
     this.gesture = new Gesture(this.root);
+    this.timeline = new Timeline();
     this.position_begin = {};
     this.offset = {};
+    this.timeline.start();
   }
   create_ui() {
     // 前进和后退按钮
@@ -31,21 +34,21 @@ export default class Carousel extends Component {
     btn_right.className = "btn btn_right";
     btn_right.dataset.id = 1;
     // 滑块
-    const slider = document.createElement("div");
-    slider.id = "slider";
-    slider.className = "slider";
+    this.slider = document.createElement("div");
+    this.slider.id = "slider";
+    this.slider.className = "slider";
     for (let i = 0; i < this.attributes["src"].length; i++) {
       const slide = document.createElement("div");
       slide.classList.add("slide");
       const img = document.createElement("img");
       img.src = this.attributes.src[i];
       slide.appendChild(img);
-      slider.appendChild(slide);
+      this.slider.appendChild(slide);
     }
-    this.slides_update(slider);
+    this.slides_update(this.slider);
     // appendChild
     this.root.className = "carousel";
-    this.root.appendChild(slider);
+    this.root.appendChild(this.slider);
     this.root.appendChild(btn_left);
     this.root.appendChild(btn_right);
     // 触屏默认行为的定制，利用css的属性
@@ -81,10 +84,9 @@ export default class Carousel extends Component {
     });
   }
   slides_update(sliders) {
-    const slider = sliders || this.root.getElementsByClassName("slider")[0];
     for (let i = 0; i < this.attributes["src"].length; i++) {
-      const slide = slider.children[i];
-      slide.style["transition"] = "none";
+      const slide = this.slider.children[i];
+      // slide.style["transition"] = "none";
 
       if (i === this.index) {
         slide.classList.add("current");
@@ -103,7 +105,7 @@ export default class Carousel extends Component {
         slide.classList.remove("previous");
         slide.classList.remove("next");
       }
-      slide.style["transition"] = "";
+      // slide.style["transition"] = "";
     }
   }
   slider_animation(direction) {
@@ -119,20 +121,17 @@ export default class Carousel extends Component {
     slider.style.transition = "";
   }
   moveHandler(direction, type) {
-    // console.log("direction:", direction);
-    if (type === "automatic") this.clearTimer("autoplay");
-    this.slider_animation(direction);
-    this.index = this.getIndex(direction === "right" ? -1 : 1);
-    // console.log(this.index);
-    this.clearTimer("transition");
-    this.timer["transition"] = setTimeout(() => {
-      this.slider_reset();
-      this.slides_update();
-      // 自动轮播
-      if (this.autoplay) {
-        this.timer["autoplay"] = this.automatic(this.option.during);
-      }
-    }, this.option.transitionTime);
+    console.log("direction:", direction);
+    const sign = direction === "right" ? 1 : -1;
+    const animationProps = {
+      object: this.slider,
+      property: "left",
+      startValue: this.offset.x || 0,
+      endValue: this.root.clientWidth * sign,
+      delay: 0,
+      duration: this.option.transitionTime,
+    };
+    this.timeline.add(animationProps);
   }
   automatic(ms) {
     this.clearTimer("autoplay");
@@ -147,6 +146,21 @@ export default class Carousel extends Component {
     return this.timer["autoplay"];
   }
   render() {
+    // // 自动轮播
+    //   if (this.autoplay) {
+    //     this.timer["autoplay"] = this.automatic(this.option.during);
+    //   }
+    // }, this.option.transitionTime);
+    this.timeline.on("start", (e) => {
+      const { left } = e.detail;
+      this.slider.style.left = left + "px";
+    });
+    this.timeline.on("end", (e) => {
+      const amount = this.direction === "left" ? 1 : -1;
+      this.index = this.getIndex(amount);
+      this.slides_update();
+      this.slider.style.left = null;
+    });
     this.gesture.on("start", (e) => {
       const {} = e.detail;
       console.log(e.type);
@@ -170,7 +184,7 @@ export default class Carousel extends Component {
       const { x, y } = e.detail;
       this.offset.x = x - this.position_begin.x;
       // this.offset.y = e.y - this.position_begin.y;
-      slider.style.left = this.offset.x + "px";
+      this.slider.style.left = this.offset.x + "px";
       // console.log("x:", x);
       // console.log("this.offset:", this.offset.x);
     });
@@ -179,7 +193,7 @@ export default class Carousel extends Component {
       const { x, y } = e.detail;
       document.body.style.cursor = null;
       this.root.style.cursor = "grab";
-      this.autoplay = this.option.autoplay;
+      // this.autoplay = this.option.autoplay;
       const validOffset =
         typeof this.option.dragDistance === "string"
           ? this.option.dragDistance.slice(0, -2)
@@ -212,7 +226,8 @@ export default class Carousel extends Component {
       console.log(e.type);
       const { target } = e.detail;
       const direction = target.dataset.id == 0 ? "right" : "left";
-      this.moveHandler(direction);
+
+      // this.moveHandler(direction);
     });
     this.gesture.on("flick", (e) => {
       const { direction } = e.detail;

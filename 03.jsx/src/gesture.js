@@ -1,5 +1,6 @@
 import { defaultOptions } from "./gestureDefaultConfig.js";
 import { typeIs } from "./utils.js";
+
 // Todo：
 // - 支持多触点
 export class Gesture {

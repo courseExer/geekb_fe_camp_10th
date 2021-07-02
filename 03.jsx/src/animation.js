@@ -1,11 +1,12 @@
 import timingFunction from "./timingFunction.js";
+import { typeIs } from "./utils.js";
+
 const TICK = Symbol("tick"); // fn，动画机制
 const TICK_HANDLER = Symbol("tick_handler"); // number,requestAnimation的返回值
 const ANIMATIONS = Symbol("animations"); // set,animation object
 const ADD_ANIMATION = Symbol("add_animation"); // map,k=animation,v=timestamp
 const PAUSE = Symbol("pause"); // object,动画暂停对象
 
-let dbg = [];
 // 虚拟时间线，为animation输出虚拟时间
 export class Timeline {
   constructor() {
@@ -16,6 +17,17 @@ export class Timeline {
       startTime: null,
       duration: 0,
     };
+    this.element = document.createDocumentFragment();
+  }
+  on(type, callback) {
+    const dataType = typeIs(type);
+    if (!["string", "array"].includes(dataType))
+      throw new Error("type类型错误");
+
+    if (typeIs(type) === "string") type = [type];
+    type.forEach((t) => {
+      this.element.addEventListener(t, callback);
+    });
   }
   start() {
     if (this.state !== "initialized") return;
@@ -35,7 +47,15 @@ export class Timeline {
           this[ANIMATIONS].delete(animation);
           time_ran = animation.duration;
         }
-        time_ran > 0 && animation.receive(time_ran);
+        if (time_ran < animation.duration) {
+          const value = animation.receive(time_ran, this);
+          const event = new Event("start");
+          event.detail = { left: value };
+          this.element.dispatchEvent(event);
+        } else {
+          const event = new Event("end");
+          this.element.dispatchEvent(event);
+        }
       }
       this[TICK_HANDLER] = requestAnimationFrame(this[TICK]);
     };
@@ -60,8 +80,9 @@ export class Timeline {
   }
   get rate() {}
   set rate(v) {}
-  add(animation, timeStamp) {
+  add(animationProps, timeStamp) {
     if (timeStamp === void 0) timeStamp = Date.now();
+    const animation = new Animation(animationProps);
     this[ANIMATIONS].add(animation);
     this[ADD_ANIMATION].set(animation, timeStamp + animation.delay);
     console.log("任务添加完毕");
@@ -94,15 +115,10 @@ export class Animation {
         : options[item];
     });
   }
-  receive(time) {
+  receive(time, ctx) {
     let range = this.endValue - this.startValue;
     let progress = timingFunction(this.timingFunction, time / this.duration);
-    this.object[this.property] = this.startValue + range * progress;
-    console.log(
-      "animation received:",
-      time,
-      "\nanimation value:",
-      Math.floor(this.object[this.property])
-    );
+    const value = this.startValue + range * progress;
+    return value;
   }
 }

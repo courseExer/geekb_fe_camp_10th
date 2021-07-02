@@ -63,8 +63,17 @@ chrome 浏览器的 pc 版对触点的支持不好（仅支持一个），虽然
 
 touch-action 这个 css 属性对于触屏来说太重要了，属性可以组合，来应对 ios 下的所有浏览器有 touch 相关默认行为的问题，可以定制解决方案
 
+css transition动画（A） 和 去css transition（B） 两种思维方式的优劣：
+- A方案更加简单直观，性能好
+- B方案复杂，性能损耗也较多（tick一直在狂跑），但细节可控性更好
+以下记录一些细节：
+？？
 ### 问题
 
 gesture 在 pc 模式下，pan 的数量明显比 mobile 模式下要多，而且有延时现象
+
+引入timeline之后，发现动画相比css transition不那么流畅，如果carousel尺寸越大则越明显
+思考原因是：
+设备支持60fps，但仍然没有GPU加速那么的顺畅，而css默认是支持的
 
 ## Attribute 的设计改良
