@@ -1,28 +1,35 @@
 import { Component } from "./framework.js";
+import Gesture from "./gesture.js";
 import Style from "./Carousel.less";
 
 export default class Carousel extends Component {
   constructor() {
     super();
     this.option = {
-      autoplay: true,
+      autoplay: false,
       dragDistance: "10px", // 支持小数，像素
       during: 3000,
       direction: "left", // left|right
       changeDirection: true, // 外力可以改变轮播方向
       transitionTime: 500,
     };
+    // this属性需要理一理
     this.autoplay = this.option.autoplay;
     this.direction = this.option.direction;
     this.index = 0;
     this.timer = {};
+    this.gesture = new Gesture(this.root);
+    this.position_begin = {};
+    this.offset = {};
   }
   create_ui() {
     // 前进和后退按钮
     const btn_left = document.createElement("div");
     btn_left.className = "btn btn_left";
+    btn_left.dataset.id = 0;
     const btn_right = document.createElement("div");
     btn_right.className = "btn btn_right";
+    btn_right.dataset.id = 1;
     // 滑块
     const slider = document.createElement("div");
     slider.id = "slider";
@@ -41,6 +48,8 @@ export default class Carousel extends Component {
     this.root.appendChild(slider);
     this.root.appendChild(btn_left);
     this.root.appendChild(btn_right);
+    // 触屏默认行为的定制，利用css的属性
+    // this.root.style["touch-action"] = "none";
 
     return this.root;
   }
@@ -66,7 +75,7 @@ export default class Carousel extends Component {
   clearTimer(name) {
     Object.keys(this.timer).forEach((item) => {
       if (name === item || !name) {
-        console.log("clearTimer:", item, this.timer[item]);
+        // console.log("clearTimer:", item, this.timer[item]);
         clearTimeout(this.timer[item]);
       }
     });
@@ -110,11 +119,11 @@ export default class Carousel extends Component {
     slider.style.transition = "";
   }
   moveHandler(direction, type) {
-    console.log("direction:", direction);
+    // console.log("direction:", direction);
     if (type === "automatic") this.clearTimer("autoplay");
     this.slider_animation(direction);
     this.index = this.getIndex(direction === "right" ? -1 : 1);
-    console.log(this.index);
+    // console.log(this.index);
     this.clearTimer("transition");
     this.timer["transition"] = setTimeout(() => {
       this.slider_reset();
@@ -138,39 +147,36 @@ export default class Carousel extends Component {
     return this.timer["autoplay"];
   }
   render() {
-    // ===按钮===
-    this.root
-      .getElementsByClassName("btn_left")[0]
-      .addEventListener("click", (e) => this.moveHandler("right"));
-    this.root
-      .getElementsByClassName("btn_right")[0]
-      .addEventListener("click", (e) => this.moveHandler("left"));
-    // ===鼠标拖拽===
-    let position_begin = {};
-    let offset = {};
-    const mousedownHandler = (e) => {
+    this.gesture.on("start", (e) => {
+      const {} = e.detail;
+      console.log(e.type);
+    });
+    this.gesture.on("panstart", (e) => {
+      console.log(e.type);
+      const { x, y } = e.detail;
+
       if (e.target.classList.contains("btn")) {
         e.stopPropagation();
         return false;
       }
-      console.log("mousedown");
       this.clearTimer("autoplay");
-      document.addEventListener("mousemove", mousemoveHandler);
-      document.addEventListener("mouseup", mouseupHandler);
       document.body.style.cursor = "grabbing";
       this.root.style.cursor = "grabbing";
-      position_begin.x = e.x;
-      position_begin.y = e.y;
-    };
-    const mousemoveHandler = (e) => {
-      offset.x = e.x - position_begin.x;
-      // offset.y = e.y - position_begin.y;
-      slider.style.left = offset.x + "px";
-    };
-    const mouseupHandler = (e) => {
-      console.log("mouseup");
-      document.removeEventListener("mousemove", mousemoveHandler);
-      document.removeEventListener("mouseup", mouseupHandler);
+      this.position_begin.x = x;
+      this.position_begin.y = y;
+    });
+    this.gesture.on("pan", (e) => {
+      console.log(e.type);
+      const { x, y } = e.detail;
+      this.offset.x = x - this.position_begin.x;
+      // this.offset.y = e.y - this.position_begin.y;
+      slider.style.left = this.offset.x + "px";
+      // console.log("x:", x);
+      // console.log("this.offset:", this.offset.x);
+    });
+    this.gesture.on("panend", (e) => {
+      console.log(e.type);
+      const { x, y } = e.detail;
       document.body.style.cursor = null;
       this.root.style.cursor = "grab";
       this.autoplay = this.option.autoplay;
@@ -179,26 +185,43 @@ export default class Carousel extends Component {
           ? this.option.dragDistance.slice(0, -2)
           : this.root.clientWidth * this.option.dragDistance;
 
-      if (Math.abs(offset.x) > validOffset) {
+      if (Math.abs(this.offset.x) > validOffset) {
         if (this.option.changeDirection)
-          this.direction = offset.x > 0 ? "right" : "left";
+          this.direction = this.offset.x > 0 ? "right" : "left";
         this.moveHandler.call(this, this.direction);
       } else {
         this.slider_reset();
       }
       slider.style.left = "";
       // 消费完毕重置
-      offset.x = 0;
-      offset.y = 0;
+      this.offset.x = 0;
+      this.offset.y = 0;
 
       // 自动轮播
       if (this.autoplay) {
         this.timer["autoplay"] = this.automatic(this.option.during + 500);
       }
-    };
-
-    this.root.addEventListener("mousedown", mousedownHandler);
-
+    });
+    this.gesture.on("pressstart", (e) => {
+      console.log(e.type);
+    });
+    this.gesture.on("pressend", (e) => {
+      console.log(e.type);
+    });
+    this.gesture.on(["tap"], (e) => {
+      console.log(e.type);
+      const { target } = e.detail;
+      const direction = target.dataset.id == 0 ? "left" : "right";
+      this.moveHandler(direction);
+    });
+    this.gesture.on("flick", (e) => {
+      const { direction } = e.detail;
+      console.log(e.type);
+      this.moveHandler(direction);
+    });
+    this.gesture.on("cancel", (e) => {
+      console.log(e.type);
+    });
     window.onload = () => {
       // 自动轮播
       if (this.autoplay) {

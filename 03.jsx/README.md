@@ -15,35 +15,56 @@ mouseup 时有异步的 updateSlide，而 click 则没有写 updateSlide，居�
 
 美中不足的是，幻灯片更新中将居中的图片移除后再放入。这样逻辑是简单了屏幕上也看不到，但性能上可否再优化下？
 
-autoplay执行的逻辑被分散在了各处，如何利用设计模式让代码更加集中一些呢
+autoplay 执行的逻辑被分散在了各处，如何利用设计模式让代码更加集中一些呢
 
 当前未考虑组件的生命周期以及元素的解绑
 
-使用classname来做transition的问题主要在于：
-- transitionTime是可以配置的，但还需要传值给css变量，虽然可以通过css变量来实现，但还是js中统一处理更好些
+使用 classname 来做 transition 的问题主要在于：
+
+- transitionTime 是可以配置的，但还需要传值给 css 变量，虽然可以通过 css 变量来实现，但还是 js 中统一处理更好些
 - 这个主要还是从使用者角度来看，如何配合更加容易落地
-后续全部用style来做吧
+  后续全部用 style 来做吧
 
 ## 封装动画
 
 ### 问题：
-开头几个轮空的tick，需要排查下问题
-时间线我当前做成永不停止，这样比较好理解些。但从性能上来说，平白浪费了资源了，后续改为cancelRequestAnimation吧
+
+开头几个轮空的 tick，需要排查下问题
+时间线我当前做成永不停止，这样比较好理解些。但从性能上来说，平白浪费了资源了，后续改为 cancelRequestAnimation 吧
 
 Object.create(event)
-如果将event对象作为原型对象，创建的对象怪怪的：
+如果将 event 对象作为原型对象，创建的对象怪怪的：
+
 - 实例对象的属性不对
 - const {xx,yy} = newevent，居然报错“Illegal invocation”（非法调用），why？？？
 
 ### 其他：
-使用requestAnimationFrame时我曾有个疑惑，就是动画在高刷新率的设备和低刷新率的设备上，会不会有快慢之别？
+
+使用 requestAnimationFrame 时我曾有个疑惑，就是动画在高刷新率的设备和低刷新率的设备上，会不会有快慢之别？
 实际上具体看你的实现了，只要时间是一致的动画的播放就不会有快慢之分，只有丝滑与否的区别。
-目标上，我们需要将startValue递增或递减到endValue
-手段上，让将时间戳差值参与计算，从startTime到startTime+durationTime
+目标上，我们需要将 startValue 递增或递减到 endValue
+手段上，让将时间戳差值参与计算，从 startTime 到 startTime+durationTime
 
-我们使用js来实现timeline的功能，目的是替换css的transition。
-从api设计上我们可以参考它
+我们使用 js 来实现 timeline 的功能，目的是替换 css 的 transition。
+从 api 设计上我们可以参考它
 
-chrome浏览器的pc版对触点的支持不好（仅支持一个），虽然mbp的触控板支持多触点
-因此pc版中打开devtool切换为mobile模式，仍然是一个触点。
-正确的测试应该是去手机的chrome上测试
+chrome 浏览器的 pc 版对触点的支持不好（仅支持一个），虽然 mbp 的触控板支持多触点
+因此 pc 版中打开 devtool 切换为 mobile 模式，仍然是一个触点。
+正确的测试应该是去手机的 chrome 上测试
+
+## 应用
+
+要做的几件事：
+
+- framework 文件中的架构调整
+- 应用手势库
+- 应用动画库 替换 css 动画
+- ？？
+
+touch-action 这个 css 属性对于触屏来说太重要了，属性可以组合，来应对 ios 下的所有浏览器有 touch 相关默认行为的问题，可以定制解决方案
+
+### 问题
+
+gesture 在 pc 模式下，pan 的数量明显比 mobile 模式下要多，而且有延时现象
+
+## Attribute 的设计改良

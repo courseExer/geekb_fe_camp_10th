@@ -10,28 +10,28 @@ const images = [
   "./asset/resource/square-small.jpg",
   "./asset/resource/square-big.jpg",
 ];
-// let a = <Carousel id="carousel" src={images} />;
-// a.mountTo(document.getElementById("app"));
+let a = <Carousel id="carousel" src={images} />;
+a.mountTo(document.getElementById("app"));
 
-let timeline = new Timeline();
-window.timeline = timeline;
+// let timeline = new Timeline();
+// window.timeline = timeline;
 
-timeline.add(
-  new Animation({
-    object: {},
-    property: "test",
-    startValue: 0,
-    endValue: 50,
-    delay: 2000,
-    duration: 1000,
-  })
-);
+// timeline.add(
+//   new Animation({
+//     object: {},
+//     property: "test",
+//     startValue: 0,
+//     endValue: 50,
+//     delay: 2000,
+//     duration: 1000,
+//   })
+// );
 
-timeline.start();
+// timeline.start();
 
-setTimeout(() => {
-  timeline.pause();
-}, 2500);
-setTimeout(() => {
-  timeline.resume();
-}, 3500);
+// setTimeout(() => {
+//   timeline.pause();
+// }, 2500);
+// setTimeout(() => {
+//   timeline.resume();
+// }, 3500);

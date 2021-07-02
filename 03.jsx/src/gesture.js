@@ -245,6 +245,18 @@ export class Dispatcher {
     if (["start"].includes(eventName) && this.lastState === eventName) {
       return;
     }
+    // elm.dispatchEvent(event)之后，event.target就是elm
+    // 所以，我们现在有2个方式来传递target：
+    // - targetElm.dispatchEvent(event); // 方案1
+    // - event.detail = {target:targetElm}; otherElm.dispatchEvent(event);// 方案2
+    // 方案1和2的核心区别在于到底由谁来触发自定义事件，这也决定了外层如何监听事件。
+    // 如果采用方案1，理解成本很低。
+    // - 里层来看，用户触发了哪个UI元素就由谁来派发事件
+    // - 外层来看，还是能监听根元素的，因为事件可以冒泡
+    // - 担忧：那如果哪一层阻止来冒泡呢？是否需要自己来建立一套事件体系更安全呢？
+    // 如果采用方案2，理解成本也不高。
+    // - 里层来看，全权由根元素代理派发事件。detail是唯一开放的属性（当然你可以添加event上的属性）
+    // - 外层来看，监听这个代理元素，无需冒泡。
     this.element.dispatchEvent(event);
     this.lastState = eventName;
   }
