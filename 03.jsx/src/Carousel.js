@@ -6,7 +6,7 @@ export default class Carousel extends Component {
   constructor() {
     super();
     this.option = {
-      autoplay: false,
+      autoplay: true,
       dragDistance: "10px", // 支持小数，像素
       during: 3000,
       direction: "left", // left|right
@@ -211,7 +211,7 @@ export default class Carousel extends Component {
     this.gesture.on(["tap"], (e) => {
       console.log(e.type);
       const { target } = e.detail;
-      const direction = target.dataset.id == 0 ? "left" : "right";
+      const direction = target.dataset.id == 0 ? "right" : "left";
       this.moveHandler(direction);
     });
     this.gesture.on("flick", (e) => {
