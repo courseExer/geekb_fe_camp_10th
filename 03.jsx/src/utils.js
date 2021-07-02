@@ -1,3 +1,7 @@
 export function typeIs(value) {
-  return Object.toString.call(value).slice(1, -1).split(" ")[1];
+  return Object.prototype.toString
+    .call(value)
+    .slice(1, -1)
+    .split(" ")[1]
+    .toLowerCase();
 }
