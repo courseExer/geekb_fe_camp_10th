@@ -46,18 +46,21 @@ export class Listener {
   }
   init() {
     const { requireEvents, preventEvents } = this.ctx.options;
-    requireEvents.forEach((eventName) => {
-      if (["mousemove", "mouseup"].includes(eventName)) return;
-      const bindingObject = ["mousedown", "touchstart"].includes(eventName)
-        ? this.element
-        : document;
-      bindingObject.addEventListener(eventName, (e) =>
-        this["handle_" + eventName](e)
-      );
-    });
-    preventEvents.forEach((eventName) => {
-      this.element.addEventListener(eventName, (e) => e.preventDefault());
-    });
+    requireEvents &&
+      requireEvents.forEach((eventName) => {
+        if (["mousemove", "mouseup"].includes(eventName)) return;
+        const bindingObject = ["mousedown", "touchstart"].includes(eventName)
+          ? this.element
+          : document;
+        bindingObject.addEventListener(eventName, (e) => {
+          this["handle_" + eventName](e);
+          console.log("mouse系列绑定");
+        });
+      });
+    preventEvents &&
+      preventEvents.forEach((eventName) => {
+        this.element.addEventListener(eventName, (e) => e.preventDefault());
+      });
   }
   normalize_event(e) {
     let eventData = new Event(e.type);
@@ -88,6 +91,7 @@ export class Listener {
     return eventData;
   }
   handle_mousedown(e) {
+    console.log("mousedown！");
     // e.preventDefault();
     if (this.ctx.hasTouchApis) {
       this.element.removeEventListener(

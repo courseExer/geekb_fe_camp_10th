@@ -1,35 +1,36 @@
+import { typeIs } from "./utils.js";
 export class Component {
   constructor(type) {
-    type = type || "div";
-    this.root = document.createElement(type);
     this.attributes = Object.create(null);
   }
   setAttribute(name, value) {
     this.attributes[name] = value;
     this.root.setAttribute(name, value);
   }
-  appendChild(element) {
-    element.mountTo(this.root);
-  }
-  mountTo(dom) {
-    dom.appendChild(this.root);
-  }
   render() {
     throw new Error("需要写render函数");
+  }
+  mountTo(elm) {
+    this.root = this.render().root;
+    elm.appendChild(this.root);
+    this.componentDidMount();
+  }
+  appendChild(node) {
+    this.root.appendChild(node.root);
   }
 }
 
 class ElementWrapper extends Component {
   constructor(type) {
-    // super(type);
+    super(type);
+    type = type || "div";
     this.root = document.createElement(type);
   }
 }
 
 class TextNodeWrapper extends Component {
-  constructor(content) {
-    // super();
-    content = content || "";
+  constructor(content = "") {
+    super();
     this.root = document.createTextNode(content);
   }
 }
@@ -46,13 +47,28 @@ export function createElement(type, attrs, ...children) {
   }
 
   for (let attrName in attrs) {
-    element.setAttribute(attrName, attrs[attrName]);
+    const attrNameMap = {
+      className: "class",
+    };
+    function getAttrName(name) {
+      return Object.keys(attrNameMap).includes(name) ? attrNameMap[name] : name;
+    }
+    element.setAttribute(getAttrName(attrName), attrs[attrName]);
   }
 
-  for (let child of children) {
-    if (typeof child === "string") child = new TextNodeWrapper(child);
-    child.appendChild(element);
+  function appendElement(children) {
+    for (let child of children) {
+      if (typeIs(child) === "array") {
+        appendElement(child);
+        continue;
+      }
+      if (typeof child === "string") {
+        child = new TextNodeWrapper(child);
+      }
+      element.appendChild(child);
+    }
   }
+  appendElement(children);
 
   return element;
 }
