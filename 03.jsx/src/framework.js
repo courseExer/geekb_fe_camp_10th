@@ -2,6 +2,7 @@ import { typeIs } from "./utils.js";
 export class Component {
   constructor(type) {
     this.attributes = Object.create(null);
+    this.children = [];
   }
   setAttribute(name, value) {
     this.attributes[name] = value;
@@ -65,10 +66,11 @@ export function createElement(type, attrs, ...children) {
       if (typeof child === "string") {
         child = new TextNodeWrapper(child);
       }
+      element.children.push(child);
       element.appendChild(child);
     }
   }
   appendElement(children);
-
+  console.log("element:", element);
   return element;
 }

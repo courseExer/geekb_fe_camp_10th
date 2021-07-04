@@ -6,6 +6,7 @@ import { Timeline } from "./animation.js";
 // Todo:
 // - timeline动画过程中，轮播暂停的情况
 // - 其他事件的处理
+// - Fragment元素
 export default class Carousel extends Component {
   constructor() {
     super();
@@ -151,7 +152,6 @@ export default class Carousel extends Component {
         } else if (index === this.getIndex(1)) {
           clazz = " next";
         }
-
         return (
           <div className={"slide" + clazz}>
             <img src={item} />
@@ -159,10 +159,12 @@ export default class Carousel extends Component {
         );
       });
     };
+    console.log("this.children:", this.children);
     return (
       <div className="carousel">
         <div className="slider" id="slider">
           {slides()}
+          {this.children}
         </div>
         <div className="btn btn_left" data-id="0"></div>
         <div className="btn btn_right" data-id="1"></div>

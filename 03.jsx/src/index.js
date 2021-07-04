@@ -10,7 +10,11 @@ const images = [
   "./asset/resource/square-small.jpg",
   "./asset/resource/square-big.jpg",
 ];
-let a = <Carousel id="carousel" src={images} />;
+let a = (
+  <Carousel id="carousel" src={images}>
+    <div className="children">children!</div>
+  </Carousel>
+);
 a.mountTo(document.getElementById("app"));
 
 // let timeline = new Timeline();
