@@ -1,0 +1,14 @@
+{
+  "name": "crawler",
+  "version": "1.0.0",
+  "description": "标准文档的爬虫工具",
+  "main": "index.js",
+  "scripts": {
+    "css": "node ./src/index.js"
+  },
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^16.7.0"
+  }
+}
