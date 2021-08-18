@@ -47,7 +47,7 @@ export class Crawler {
         return this.fetchFile(item);
       });
       await Promise.allSettled(task).then((results) => {
-        console.log("done");
+        // console.log("done");
         // todo
       });
     }
@@ -60,11 +60,11 @@ export class Crawler {
     return new Promise((resolve, rejects) => {
       try {
         fs.accessSync(destFilePath);
-        // console.log(`缓存文件已存在 ${destFilePath}`);
+        console.log(`已存在 ${destFilePath}`);
         resolve(destFilePath);
         return;
       } catch (err) {
-        console.log(`正在下载 ${destFilePath}`);
+        console.log(`下载 ${destFilePath}`);
       }
 
       https

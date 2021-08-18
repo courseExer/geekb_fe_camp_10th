@@ -6,56 +6,38 @@ import { url2filename } from "./tools/util.js";
 
 const filename = import.meta.url.replace("file://", "");
 const dirname = path.dirname(filename);
-const entryUrl = "https://www.w3.org/TR/?tag=css";
-let data = [];
+
+let entries = [];
+let properties = [];
 
 void (async function () {
   const crawler = new Crawler({ type: "css" });
-  await crawler.download(entryUrl);
-  const content = fs.readFileSync(
-    path.resolve(crawler.cachePath, url2filename(entryUrl)),
-    "utf-8"
-  );
-  const entries = crawler.parse(content, getStandards); // 解析TR文档
-  await crawler.download(
-    entries.map((item) => item.url),
-    10
-  );
+  const entryPath = path.resolve(crawler.cachePath, "result_TR");
+  console.log(entryPath);
 
-  entries.forEach((entry) => {
+  try {
+    entries = JSON.parse(fs.readFileSync(entryPath, "utf-8"));
+  } catch (e) {
+    console.log(`读取错误 ${entryPath}`);
+  }
+
+  for (let entry of entries) {
+    const cacheFileName = url2filename(entry.url);
     const content = fs.readFileSync(
-      path.resolve(crawler.cachePath, url2filename(entry.url)),
+      path.resolve(crawler.cachePath, cacheFileName),
       "utf-8"
     );
-    data.push(crawler.parse(content, getProperties)); // 解析各个文档
-  });
-  console.log(data);
-  // crawler.view(data, tpl);
-})();
-
-// 从TR文档中获取标准来源
-export function getStandards(content) {
-  const virtualConsole = new jsdom.VirtualConsole();
-  const dom = new JSDOM(content, { virtualConsole });
-
-  const elm_container = dom.window.document.getElementById("container");
-  const elm_lis = elm_container.children;
-  const standards = [];
-
-  for (let i = 0; i < elm_lis.length; i++) {
-    const elm_a = elm_lis[i].getElementsByTagName("a")[0] || {};
-    const data = elm_lis[i].dataset;
-    let standard = {
-      title: data["title"],
-      tag: data["tag"].split(" "),
-      status: data["status"],
-      url: elm_a.href,
-    };
-    // 实施过滤
-    if (standard.tag.includes("css")) standards.push(standard);
+    console.log(`正在解析 ${cacheFileName}`);
+    const data = crawler.parse(content, getProperties);
+    if (data === null) continue;
+    properties.push(data); // 解析各个文档
   }
-  return standards;
-}
+
+  fs.writeFileSync(
+    path.resolve(crawler.cachePath, "result_props"),
+    `${JSON.stringify(properties)}`
+  );
+})();
 
 export function getProperties(content) {
   const selector = "table.def.propdef";
@@ -84,5 +66,6 @@ export function getProperties(content) {
     }
     properties[attrName] = kv;
   }
+  if (Object.keys(properties).length === 0) return null;
   return properties;
 }

@@ -4,7 +4,9 @@
   "description": "标准文档的爬虫工具",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/index.js",
+    "download": "node ./src/download.js",
+    "parse": "node ./src/parse.js",
+    "view": "node ./src/view.js",
     "clear:css": "rm -rf ./cache/css"
   },
   "type": "module",
