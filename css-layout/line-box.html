@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css" />
+    <style>
+      /* 环境设置 */
+      html,
+      body {
+        box-sizing: border-box;
+        height: 100%;
+        padding: 10px;
+        background-color: rgb(240, 240, 240);
+      }
+      #root {
+        box-sizing: border-box;
+        background-color: rgb(240, 240, 240);
+        height: 100%;
+      }
+      .line-level-box {
+        min-height: 10px;
+        font-size: 0;
+        background-color: white;
+      }
+      .text1,
+      .text2 {
+        background-color: burlywood;
+      }
+      .line-box1,
+      .line-box2 {
+        background-color: burlywood;
+      }
+      /* 参考线 */
+      .ref-line {
+        display: inline-block;
+        position: relative;
+        width: 0;
+        height: 0;
+      }
+      .ref-line::before {
+        content: "";
+        display: inline-block;
+        width: 500px;
+        height: 0.1px;
+        background-color: red;
+      }
+      .ref-line::after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        content: "default";
+        font-size: 10px;
+      }
+      .line-top {
+        vertical-align: top;
+      }
+      .line-top::after {
+        content: "top";
+      }
+      .line-bottom {
+        vertical-align: bottom;
+      }
+      .line-bottom::after {
+        content: "bottom";
+      }
+      .line-text-top {
+        vertical-align: text-top;
+      }
+      .line-text-top::after {
+        content: "text-top";
+      }
+      .line-text-bottom {
+        vertical-align: text-bottom;
+      }
+      .line-text-bottom::after {
+        content: "text-bottom";
+      }
+      .line-baseline {
+        vertical-align: baseline;
+      }
+      .line-baseline::after {
+        content: "baseline";
+      }
+      .line-middle {
+        vertical-align: middle;
+      }
+      .line-middle::after {
+        content: "middle";
+      }
+    </style>
+    <style>
+      .text1 {
+        font-size: 50px;
+      }
+      .text2 {
+        font-size: 100px;
+        line-height: 200px;
+      }
+      .line-box1 {
+        display: inline-block;
+        vertical-align: middle;
+        width: 50px;
+        height: 50px;
+      }
+      .line-box2 {
+        display: inline-block;
+        vertical-align: middle;
+        width: 40px;
+        height: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="line-level-box">
+        <!-- 一堆参考线 -->
+        <span class="ref-line line-top"></span>
+        <span class="ref-line line-bottom"></span>
+        <span class="ref-line line-text-top"></span>
+        <span class="ref-line line-text-bottom"></span>
+        <span class="ref-line line-baseline"></span>
+        <span class="ref-line line-middle"></span>
+        <!-- 混排元素 -->
+        <span class="text1">english</span>
+        <span class="text1">英国</span>
+        <div class="line-box1"></div>
+        <div class="line-box2"></div>
+        <span class="text2">fish</span>
+        <span class="text2">鱼</span>
+      </div>
+    </div>
+  </body>
+</html>
