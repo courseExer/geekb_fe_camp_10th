@@ -1,0 +1,11 @@
+{
+  "name": "webapi",
+  "version": "1.0.0",
+  "description": "搜集webapi接口",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
