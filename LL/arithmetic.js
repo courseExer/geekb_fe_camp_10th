@@ -32,3 +32,37 @@ export function* tokenize(source) {
   }
   yield { type: "EOF" };
 }
+
+// ================语法分析==================
+
+export function Expression(tokens) {}
+export function AdditiveExpression(source) {}
+// 乘法
+export function MultiplicativeExpression(source) {
+  if (source[0].type === "Number") {
+    let node = Node("MultiplicativeExpression");
+    node.children = [source[0]];
+    source[0] = node;
+    return MultiplicativeExpression(source);
+  }
+  if (
+    source[0].type === "MultiplicativeExpression" &&
+    source[1] &&
+    ["*", "/"].includes(source[1].type)
+  ) {
+    let node = Node("MultiplicativeExpression");
+    node.operator = source[1].type;
+    node.children.push(source.shift());
+    node.children.push(source.shift());
+    node.children.push(source.shift());
+    source.unshift(node);
+    return MultiplicativeExpression(source);
+  }
+  if (source[0].type === "MultiplicativeExpression") {
+    return source[0];
+  }
+  throw new Error("不应该被执行");
+}
+function Node(type = null) {
+  return { type, operator: null, children: [] };
+}
