@@ -2,10 +2,21 @@
 
 ## 四则运算
 
-问题：
-？为啥要使用 regExp.exec(source)，而不是 source.match(regExp)？
+输入一段运算表达式字符串，要求解析为 AST
+
+c(source)，而不是 source.match(regExp)？
 
 步骤：
 
-- 词法分析：使用正则表达式实现 token 的提取（利用正则的捕获组和 api 的对应关系）
 - 词法分析：
+- 词法分析：
+
+问题：
+？为啥要使用 regExp.exe
+
+问题：为何要用generator范式来处理完整字符串的词法呢？
+就四则运算这个任务而言，此处source是完整、本地的字符串，完全没有必要这么搞啊？
+我感觉像异步网络获取的chunk做流式解析的，才适合这种范式吧？
+winter：该范式使得tokenize的处理过程变成了异步
+
+问题：LL到底指什么，词法和语法分析过程都是LL吗？
