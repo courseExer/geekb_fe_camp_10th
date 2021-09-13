@@ -57,8 +57,10 @@ module.exports = () => {
   if (isProduction) {
     config.mode = "production";
     config.plugins.push(new MiniCssExtractPlugin());
+    config.devtool = "source-map";
   } else {
     config.mode = "development";
+    config.devtool = "eval-cheap-source-map";
   }
   return config;
 };
