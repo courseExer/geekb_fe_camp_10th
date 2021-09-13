@@ -1,6 +1,6 @@
-import { render } from "less";
-import React, { Component } from "react";
-export function App() {
+import React from "react";
+
+export function App(_c) {
   return (
     <div>
       <img src="/public/assets/avatar-1.jpg" />

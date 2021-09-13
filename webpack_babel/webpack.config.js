@@ -17,7 +17,7 @@ const config = {
   output: {
     path: path.resolve(__dirname, "dist"),
   },
-  target: "web", // 默认值“browserslist”导致hotReload失败，所以这里直接指定为web
+  target: ["web", "node"], // 默认值“browserslist”导致hotReload失败，所以这里直接指定为web
   devServer: {
     open: true,
     host: "localhost",
