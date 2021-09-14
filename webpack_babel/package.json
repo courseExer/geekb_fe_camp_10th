@@ -7,16 +7,17 @@
   "license": "ISC",
   "private": true,
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "init": "webpack-cli init",
     "build": "webpack --mode=production --node-env=production",
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
-    "watch": "webpack --watch",
+    "clear:dist": "rm -rf dist",
+    "clear:coverage": "rm -rf .nyc_output",
     "serve": "webpack serve",
     "eslint": "eslint src/**/*.js",
-    "test": "mocha ./src/**/*.test.js"
+    "test": "mocha ./src/**/*.test.js",
+    "coverage": "nyc npm test"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
@@ -34,6 +35,7 @@
     "less-loader": "^10.0.1",
     "mini-css-extract-plugin": "^2.1.0",
     "mocha": "^9.1.1",
+    "nyc": "^15.1.0",
     "postcss": "^8.3.5",
     "postcss-loader": "^6.1.1",
     "prettier": "^2.3.2",
