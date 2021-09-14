@@ -2,8 +2,12 @@
   "name": "my-webpack-project",
   "version": "1.0.0",
   "description": "My webpack project",
-  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "private": true,
+  "main": "index.js",
+  "type": "module",
   "scripts": {
     "init": "webpack-cli init",
     "build": "webpack --mode=production --node-env=production",
@@ -11,11 +15,9 @@
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
     "serve": "webpack serve",
-    "eslint": "eslint src/**/*.js"
+    "eslint": "eslint src/**/*.js",
+    "test": "mocha ./src/**/*.test.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
@@ -31,6 +33,7 @@
     "less": "^4.1.1",
     "less-loader": "^10.0.1",
     "mini-css-extract-plugin": "^2.1.0",
+    "mocha": "^9.1.1",
     "postcss": "^8.3.5",
     "postcss-loader": "^6.1.1",
     "prettier": "^2.3.2",
