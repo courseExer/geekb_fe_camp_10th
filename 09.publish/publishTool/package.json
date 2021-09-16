@@ -1,0 +1,12 @@
+{
+  "name": "publish_tool",
+  "version": "1.0.0",
+  "description": "publish_tool",
+  "private": true,
+  "bin": "bin/index.js",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
