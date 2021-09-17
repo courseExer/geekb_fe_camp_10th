@@ -8,7 +8,7 @@ function CONFIG() {
         "Content-Type": "application/octet-stream",
       },
     },
-    publishFilename: "index.html",
+    publishDir: "resource",
   };
 }
 
