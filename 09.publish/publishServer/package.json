@@ -2,7 +2,7 @@
   "name": "publishserver",
   "version": "1.0.0",
   "description": "publish_server",
-  "private":true,
+  "private": true,
   "bin": "bin/index.js",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "nodemon": "^2.0.12"
   },
   "dependencies": {
-    "pkg-dir": "^5.0.0"
+    "pkg-dir": "^5.0.0",
+    "unzipper": "^0.10.11"
   }
 }

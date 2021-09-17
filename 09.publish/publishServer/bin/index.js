@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 const pkgDir = require("pkg-dir");
-const deploy = require("../src/index.js");
+const app = require("../src/index.js");
 
 (async function main() {
   await env();
-  deploy();
+  app();
 })();
 
 async function env() {

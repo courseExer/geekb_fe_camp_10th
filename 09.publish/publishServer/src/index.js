@@ -1,36 +1,35 @@
 const http = require("http");
-const fs = require("fs");
 const path = require("path");
+const unzipper = require("unzipper");
 
-async function main() {
-  await env();
-  deploy();
+function main() {
+  start();
 }
 
-function deploy() {
-  const { PROJ_ROOT } = process.env;
-  const serverPath = path.resolve(PROJ_ROOT, "../server");
-  const filePath = path.resolve(serverPath, "public/index.html");
-
+function start() {
   const server = http.createServer((req, res) => {
-    let file = fs.createWriteStream(filePath);
-
-    file.on("finish", () => {
-      const { size } = fs.statSync(filePath);
-      const message = `文件大小为${size}个字节`;
-      res.writeHead(200, "ok", {
-        "Content-Type": "text/plain",
-      });
-      res.end(message);
-      console.log(new Date().toLocaleTimeString(), ",finished");
-    });
-    req.pipe(file).on("end", (chunk) => {
-      file.end(chunk);
-    });
+    deploy(req, res);
   });
   server.listen(8000, () => {
     console.log("publishServer started at 8000 port!");
   });
 }
 
-module.exports = deploy;
+function deploy(req, res) {
+  const { PROJ_ROOT } = process.env;
+  const serverPath = path.resolve(PROJ_ROOT, "../server");
+  const deployDirectory = path.resolve(serverPath, "public");
+  req.pipe(unzipper.Extract({ path: deployDirectory }));
+  req.on("end", () => {
+    const timeString = new Date().toLocaleTimeString();
+    const message_server = `部署成功 ${timeString}`;
+    const message_client = `发布成功 ${timeString}`;
+    res.writeHead(200, "ok", {
+      "Content-Type": "text/plain",
+    });
+    res.end(message_client);
+    console.log(message_server);
+  });
+}
+
+module.exports = main;
