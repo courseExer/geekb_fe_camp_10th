@@ -5,10 +5,18 @@ const archiver = require("archiver");
 const archive = archiver("zip", {
   zlib: { level: 9 },
 });
+const childProcess = require("child_process");
 const CONFIG = require("./CONST.js");
 
-function main() {
-  publish();
+async function main() {
+  await auth();
+  // publish();
+}
+
+async function auth() {
+  childProcess.exec(
+    `open https://github.com/login/oauth/authorize?client_id=${CONFIG.auth.client_id}`
+  );
 }
 
 function publish() {

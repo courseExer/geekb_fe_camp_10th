@@ -9,6 +9,9 @@ function CONFIG() {
       },
     },
     publishDir: "resource",
+    auth: {
+      client_id: "Iv1.8f4cf9203734e6e8",
+    },
   };
 }
 
