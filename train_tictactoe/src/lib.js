@@ -1,8 +1,15 @@
-// 判断一维数组的成员是否都相等（不为0）
+// 判断数组成员是否都相等（不为0）
 export function isArrayItemSame(arr) {
   return arr.every((item) => {
     return item > 0 && item === arr[0];
   });
+}
+// 判断数组成员是否将要相同（即只有一个0）
+export function isArrayItemWillSame(arr, color) {
+  const filteredArr = arr.filter((item) => item !== 0);
+  if (arr.length - filteredArr.length !== 1) return false;
+  if (filteredArr.every((item) => item === color)) return true;
+  return false;
 }
 // 二维数组进行对角线镜像
 export function getMirrorArray(array) {
