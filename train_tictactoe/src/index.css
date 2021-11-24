@@ -1,22 +1,25 @@
+:root {
+  --chess-white: "⚪";
+  --chess-black: "⚫";
+  --cols: 3;
+}
 #canvas {
-  display: inline-block;
-  border: 2px solid #cdcdcd;
 }
 .chessboard {
   box-sizing: border-box;
   list-style: none;
-  width: 450px;
-  margin: 0;
+  width: 300px;
+  margin: 10px;
   padding: 0;
   font-size: 0;
 }
 .chessboard li {
   box-sizing: border-box;
   display: inline-block;
-  width: 150px;
-  height: 150px;
-  line-height: 150px;
-  border: 3px solid #cdcdcd;
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  outline: 1px solid #cdcdcd;
   vertical-align: top;
   text-align: center;
   cursor: pointer;
@@ -24,14 +27,12 @@
 .chessboard li.black,
 .chessboard li.white {
   cursor: default;
+  font-size: 70px;
+  /* text-shadow: 0px 2px 2px #6f6f6f; */
 }
 .chessboard li.black::before {
-  content: "⚫";
-  font-size: 100px;
-  text-shadow: 0px 2px 2px #6f6f6f;
+  content: var(--chess-black);
 }
 .chessboard li.white::before {
-  content: "⚪";
-  font-size: 100px;
-  text-shadow: 0px 2px 2px #6f6f6f;
+  content: var(--chess-white);
 }
