@@ -8,27 +8,29 @@ export class Chess {
   constructor() {
     this.win = 0;
     // 0空，1黑子，2白子
-    this.chessmanMap = [null, "black", "white"];
-    this.chessman = 2;
+    this.colorMap = [null, "black", "white"];
+    this.color = 2;
     this.chess = [
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0],
     ];
   }
-  render(root = this.root) {
+  init(root) {
     this.root = root;
+    this.render()
+  }
+  render(root = this.root) {
     this.root.innerHTML = "";
     let elm_ul = document.createElement("ul");
     elm_ul.setAttribute("class", "chessboard");
     for (let row = 0; row < this.chess.length; row++) {
       for (let col = 0; col < this.chess.length; col++) {
-        const status = this.chess[row][col];
-        const attrValue = status === 1 ? "black" : status === 2 ? "white" : "";
+        const attrValue = this.colorMap[this.chess[row][col]];
         const elm_li = document.createElement("li");
         elm_li.setAttribute("class", attrValue);
-        elm_ul.appendChild(elm_li);
         elm_li.addEventListener("click", () => this.move(row, col));
+        elm_ul.appendChild(elm_li);
       }
     }
     this.root.appendChild(elm_ul);
@@ -39,65 +41,48 @@ export class Chess {
       console.log("请选择空白处落子");
       return;
     }
-    this.chessman = this.getNextMan();
-    this.chess[row][col] = this.chessman;
+    this.color = this.getNextColor();
+    this.chess[row][col] = this.color;
     this.render();
     if (this.checkWin()) {
-      console.log(this.chessmanMap[this.chessman], "获胜!");
+      console.log(this.colorMap[this.color], "获胜!");
       return;
     }
-    if (this.checkWillWin(this.getNextMan())) {
-      console.log(this.chessmanMap[this.getNextMan()], "将要获胜!");
+    if (this.checkWin(1, this.getNextColor())) {
+      console.log(this.colorMap[this.getNextColor()], "将要获胜!");
       return;
     }
   }
-  getNextMan() {
-    return this.chess.length - this.chessman;
+  getNextColor() {
+    return this.chess.length - this.color;
   }
-  checkWillWin(chessman) {
-    {
-      // 1.横向同色连子
-      for (let row = 0; row < this.chess.length; row++) {
-        if (isArrayItemWillSame(this.chess[row], chessman)) return chessman;
-      }
+  checkWin(step = 0, color = this.color) {
+    // 1.横向同色
+    for (let row = 0; row < this.chess.length; row++) {
+      if (step === 0 && isArrayItemSame(this.chess[row]))
+        return (this.win = this.color);
+      if (step === 1 && isArrayItemWillSame(this.chess[row], color))
+        return color;
     }
-    {
-      // 2.纵向同色连子
-      const arr = getMirrorArray(this.chess);
-      for (let row = 0; row < arr.length; row++) {
-        if (isArrayItemWillSame(arr[row], chessman)) return chessman;
-      }
+
+    // 2.纵向同色
+    const mirrorArr = getMirrorArray(this.chess);
+    for (let row = 0; row < mirrorArr.length; row++) {
+      if (step === 0 && isArrayItemSame(mirrorArr[row]))
+        return (this.win = this.color);
+      if (step === 1 && isArrayItemWillSame(mirrorArr[row], color))
+        return color;
     }
-    {
-      // 3.对角同色连子
-      const arr = getDiagonalArray(this.chess);
-      for (let row = 0; row < arr.length; row++) {
-        if (isArrayItemWillSame(arr[row], chessman)) return chessman;
-      }
+
+    // 3.对角同色
+    const diagonalArr = getDiagonalArray(this.chess);
+    for (let row = 0; row < diagonalArr.length; row++) {
+      if (step === 0 && isArrayItemSame(diagonalArr[row]))
+        return (this.win = this.color);
+      if (step === 1 && isArrayItemWillSame(diagonalArr[row], color))
+        return color;
     }
-    return 0;
-  }
-  checkWin() {
-    {
-      // 1.横向同色连子
-      for (let row = 0; row < this.chess.length; row++) {
-        if (isArrayItemSame(this.chess[row])) return (this.win = this.chessman);
-      }
-    }
-    {
-      // 2.纵向同色连子
-      const arr = getMirrorArray(this.chess);
-      for (let row = 0; row < arr.length; row++) {
-        if (isArrayItemSame(arr[row])) return (this.win = this.chessman);
-      }
-    }
-    {
-      // 3.对角同色连子
-      const arr = getDiagonalArray(this.chess);
-      for (let row = 0; row < arr.length; row++) {
-        if (isArrayItemSame(arr[row])) return (this.win = this.chessman);
-      }
-    }
+
     return 0;
   }
 }
