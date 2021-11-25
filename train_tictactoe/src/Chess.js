@@ -12,9 +12,9 @@ export class Chess {
     // 0空,1黑,2白
     this.color = 2;
     this.chess = [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0],
+      [0, 0, 2],
+      [1, 0, 2],
+      [1, 0, 0],
     ];
   }
   init(root) {
