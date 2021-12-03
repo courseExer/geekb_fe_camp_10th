@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traffic Lighting</title>
+    <style>
+      #board {
+        display: inline-block;
+        font-size: 0;
+        border-radius: 80px;
+        margin: 10px;
+        background-color: #bdbcbc;
+        padding: 0 5px;
+      }
+      .light {
+        display: inline-block;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: rgb(126, 126, 126);
+        margin: 20px 10px;
+      }
+      .red.show {
+        background-color: rgb(223, 2, 2);
+      }
+      .yellow.show {
+        background-color: rgb(240, 204, 3);
+      }
+      .green.show {
+        background-color: rgb(2, 172, 2);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board">
+      <div class="light red show"></div>
+      <div class="light yellow"></div>
+      <div class="light green"></div>
+    </div>
+    <script type="module" src="./src/index.js"></script>
+  </body>
+</html>
