@@ -2,16 +2,17 @@
 
 ## 成体系的 api
 
-- ECMA262:https://262.ecma-international.org/12.0/#sec-global-object
+- prefix:/^webkit/，归类
+- ECMA262:https://262.ecma-international.org/12.0/#sec-global-object，剔除
 - subClass of Node && Node
 - events:/^on/
-- webkit prefix:/^webkit/
-- whatwg 的挂载到 window 的副本：html.spec.whatwg.org/#window
+- whatwg 列出的挂载到window的object：html.spec.whatwg.org/#window
 - html-interface:https://html.spec.whatwg.org/#all-interfaces
 - Intl: https://402.ecma-international.org/5.0/#intl-object
 - webgl:https://www.khronos.org/registry/webgl/specs/latest/
 - audio:https://www.w3.org/TR/webaudio/#audioapi
 - textencode:https://encoding.spec.whatwg.org/#api
+- SVG ?
 - stream?:https://streams.spec.whatwg.org
 - sync-manager-interface:https://wicg.github.io/BackgroundSync/spec/sync-manager-interface
 

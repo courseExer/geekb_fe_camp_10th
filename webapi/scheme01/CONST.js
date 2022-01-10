@@ -108,6 +108,7 @@ export function WINDOW() {
   ];
 }
 /* https://html.spec.whatwg.org/#all-interfaces */
+// This section is non-normative
 export function INTERFACE() {
   return [
     "AudioTrack",

@@ -1,20 +1,10 @@
 import { ECMA, WINDOW, INTERFACE, STREAMS, AUDIO } from "./CONST.js";
 
-/**
- * 求差集
- * @param {Array} arr 集合
- * @param {Array} subArr 子集合
- * @returns {Array} 差集
- */
-function getComplement(arr, subArr) {
-  return arr.filter((item) => !subArr.includes(item));
-}
-
 let collection = {}; // 归类整理
 
 void (function main() {
   let globalNames = Object.getOwnPropertyNames(window);
-  console.log("window的自身属性数量:", globalNames.length); // 983
+  console.log("window的自身属性数量:", globalNames.length);
 
   // webkit prefix
   {
@@ -28,7 +18,7 @@ void (function main() {
       return true;
     });
     collection["webkitPrefix"] = matchedProperties;
-    console.log("匹配的属性个数：", matchedProperties.length);
+    console.log("匹配的属性：", matchedProperties);
   }
 
   // ECMA 262
@@ -36,7 +26,7 @@ void (function main() {
     console.log("\n---ECMA262---");
     const properties = ECMA();
     let matchedProperties = []; // properties与name的交集
-    collection["ecmascript"] = properties;
+    collection["ECMA-262"] = properties;
     globalNames = globalNames.filter((name) => {
       if (properties.includes(name)) {
         matchedProperties.push(name);
@@ -45,9 +35,9 @@ void (function main() {
       return true;
     });
     console.log("定义的属性个数：", properties.length);
-    console.log("属性与window对象属性的交集：", matchedProperties.length);
+    console.log("与window对象属性的交集：", matchedProperties.length);
     console.log(
-      "属性不在于window对象上的如下:",
+      "不在于window对象上的属性:",
       getComplement(properties, matchedProperties)
     );
   }
@@ -67,8 +57,8 @@ void (function main() {
         return true;
       }
     });
-    globalNames = globalNames.filter((e) => {
-      if (e === "Node") return false;
+    globalNames = globalNames.filter((name) => {
+      if (name === "Node") return false;
       return true;
     });
 
@@ -87,16 +77,45 @@ void (function main() {
       }
       return true;
     });
-    collection["onEvent"] = matchedProperties;
+    collection["onEventName"] = matchedProperties;
     console.log("匹配的属性个数：", matchedProperties.length);
+  }
+  {
+    console.log("\n---CSS-object---");
+    let names = [
+      "AnimationEvent",
+      "CaretPosition",
+      "FontFace",
+      "FontFaceSet",
+      "FontFaceSetLoadEvent",
+      "GetStyleUtils",
+      "MediaList",
+      "MediaQueryList",
+      "MediaQueryListEvent",
+      "Screen",
+      "StyleSheet",
+      "StyleSheetList",
+      "TransitionEvent",
+    ];
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        return false;
+      }
+      if (/^CSS/.test(name)) {
+        names.push(name);
+        return false;
+      }
+      return true;
+    });
+    collection["CSSOM"] = names;
   }
 
   // whatwg - window
   {
-    console.log("\n---window---");
+    console.log("\n---window-object---");
     const properties = WINDOW();
     let matchedProperties = [];
-    collection["window"] = properties;
+    collection["window-object"] = properties;
     globalNames = globalNames.filter((name) => {
       if (properties.includes(name)) {
         matchedProperties.push(name);
@@ -107,17 +126,17 @@ void (function main() {
     console.log("定义的属性个数：", properties.length);
     console.log("属性与window对象属性的交集：", matchedProperties.length);
     console.log(
-      "属性不在于window对象上的如下:",
+      "不在window对象上的属性:",
       getComplement(properties, matchedProperties)
     );
   }
 
   // whatwg - interfaces
   {
-    console.log("\n---interfaces---");
+    console.log("\n---html-interfaces---");
     const properties = INTERFACE();
     let matchedProperties = [];
-    collection["interfaces"] = properties;
+    collection["html-interfaces"] = properties;
     globalNames = globalNames.filter((name) => {
       if (properties.includes(name)) {
         matchedProperties.push(name);
@@ -126,9 +145,9 @@ void (function main() {
       return true;
     });
     console.log("定义的属性个数：", properties.length);
-    console.log("属性与window对象属性的交集：", matchedProperties.length);
+    console.log("与window对象属性的交集：", matchedProperties.length);
     console.log(
-      "属性不在于window对象上的如下:",
+      "不在window对象上的属性:",
       getComplement(properties, matchedProperties)
     );
   }
@@ -155,39 +174,38 @@ void (function main() {
       }
       return true;
     });
-    collection["webgl"] = matchedProperties;
+    collection["Webgl"] = matchedProperties;
     console.log("匹配的属性个数：", matchedProperties.length);
   }
 
-  
   // dom-textencoder
   // https://encoding.spec.whatwg.org/#api
   {
-    console.log("\n---textencoder---");
+    console.log("\n---textencoder?---");
     let matchedProperties = [];
     globalNames = globalNames.filter((name) => {
-      if (name.match(/text/i)) {
+      if (name.match(/Text/)) {
         matchedProperties.push(name);
         return false;
       }
       return true;
     });
-    collection["textEncoder"] = matchedProperties;
+    collection["textEncoding"] = matchedProperties;
     console.log("匹配的属性个数：", matchedProperties.length);
   }
 
   // SVG
   {
-    console.log("\n---(待整理)svg---");
+    console.log("\n---svg---");
     let matchedProperties = [];
     globalNames = globalNames.filter((name) => {
-      if (name.match(/svg/i)) {
+      if (name.match(/^svg/i)) {
         matchedProperties.push(name);
         return false;
       }
       return true;
     });
-    collection["svg"] = matchedProperties;
+    collection["SVG"] = matchedProperties;
     console.log("匹配的属性个数：", matchedProperties.length);
   }
 
@@ -273,7 +291,7 @@ void (function main() {
   }
 
   // ------------------待继续整理-----------------
-  console.log("----------以下待整理---------")
+
   // events
   {
     console.log("\n---events---");
@@ -285,13 +303,13 @@ void (function main() {
       }
       return true;
     });
-    collection["events"] = matchedProperties;
+    collection["includeEvent"] = matchedProperties;
     console.log("匹配的属性个数：", matchedProperties.length);
   }
 
   // errors
   {
-    console.log("\n---errors---");
+    console.log("\n---includeErrors---");
     let matchedProperties = [];
     globalNames = globalNames.filter((name) => {
       if (name.match(/error/i)) {
@@ -300,12 +318,252 @@ void (function main() {
       }
       return true;
     });
-    collection["errors"] = matchedProperties;
+    collection["includeError"] = matchedProperties;
     console.log("匹配的属性个数：", matchedProperties.length);
   }
 
-  /* 剩余的属性 */
+  // client request
+  {
+    console.log("\n---client request---");
+    const names = [
+      "FormData",
+      "XMLHttpRequest",
+      "XMLHttpRequestEventTarget",
+      "XMLHttpRequestUpload",
+    ];
+    collection["client-request"] = names;
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        return false;
+      }
+      return true;
+    });
+  }
+  {
+    console.log("\n---WebXR---");
+    let names = [];
+    globalNames = globalNames.filter((name) => {
+      if (/^XR/.test(name)) {
+        names.push(name);
+        return false;
+      }
+      return true;
+    });
+    collection["WebXR"] = names;
+  }
+  {
+    console.log("\n---WebRTC---");
+    let names = [
+      "MediaDevices",
+      "MediaStream",
+      "MediaStreamEvent",
+      "MediaStreamTrack",
+      "MessageEvent",
+    ];
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        return false;
+      }
+      if (/^RTC/.test(name)) {
+        names.push(name);
+        return false;
+      }
+      return true;
+    });
+    collection["WebRTC"] = names;
+  }
+  {
+    console.log("\n---GamePad---");
+    let names = [];
+    globalNames = globalNames.filter((name) => {
+      if (/^Gamepad/.test(name)) {
+        names.push(name);
+        return false;
+      }
+      return true;
+    });
+    collection["Gamepad"] = names;
+  }
+  {
+    console.log("---IndexedDB---");
+    let names = [
+      "IDBCursor",
+      "IDBCursorSync",
+      "IDBCursorWithValue",
+      "IDBDatabase",
+      "IDBDatabaseException",
+      "IDBDatabaseSync",
+      "IDBEnvironment",
+      "IDBEnvironmentSync",
+      "IDBFactory",
+      "IDBFactorySync",
+      "IDBIndex",
+      "IDBIndexSync",
+      "IDBKeyRange",
+      "IDBObjectStore",
+      "IDBObjectStoreSync",
+      "IDBOpenDBRequest",
+      "IDBRequest",
+      "IDBTransaction",
+      "IDBTransactionSync",
+      "IDBVersionChangeEvent",
+      "IDBVersionChangeRequest",
+    ];
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        names.push(name);
+        return false;
+      }
+      return true;
+    });
+    collection["IndexedDB"] = names;
+  }
+  {
+    console.log("---Web MIDI---");
+    let names = [];
+    globalNames = globalNames.filter((name) => {
+      if (/^MIDI/.test(name)) {
+        names.push(name);
+        return false;
+      }
+      return true;
+    });
+    collection["MIDI"] = names;
+  }
+  {
+    console.log("---The Encrypted Media Extensions---");
+    let names = [
+      "MediaKeySessionEvent",
+      "MediaKeys",
+      "MediaKeySession",
+      "MediaKeyStatusMap",
+      "MediaKeySystemAccess",
+    ];
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        return false;
+      }
+      return true;
+    });
+    collection["Encrypted-media"] = names;
+  }
+  {
+    console.log("---WebTransport---");
+    let names = [];
+    globalNames = globalNames.filter((name) => {
+      if (/^WebTransport/.test(name)) {
+        names.push(name);
+        return false;
+      }
+      return true;
+    });
+    collection["WebTransport"] = names;
+  }
+  {
+    console.log("---BlueTooth---");
+    let names = [];
+    globalNames = globalNames.filter((name) => {
+      if (/^bluetooth/i.test(name)) {
+        names.push(name);
+        return false;
+      }
+      return true;
+    });
+    collection["bluetooth"] = names;
+  }
+  {
+    console.log("---File System Access API---");
+    let names = [
+      "FileSystemHandle",
+      "FileSystemFileHandle",
+      "FileSystemDirectoryHandle",
+      "FileSystemWritableFileStream",
+    ];
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        return false;
+      }
+      return true;
+    });
+    collection["File-System-Access"] = names;
+  }
+  {
+    console.log("---File and Directory Entries API---");
+    let names = [
+      "FileSystemDirectoryEntry",
+      "FileSystemDirectoryReader",
+      "FileSystemEntry",
+      "FileSystemFileEntry",
+      "FileSystemFlags",
+      "FileSystem",
+    ];
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        return false;
+      }
+      return true;
+    });
+    collection["File-and-Directory-Entries"] = names;
+  }
+  {
+    console.log("---USB---");
+    let names = [];
+    globalNames = globalNames.filter((name) => {
+      if (/^USB/.test(name)) {
+        return false;
+      }
+      return true;
+    });
+    collection["Web-USB"] = names;
+  }
+  {
+    console.log("---canvas---");
+    let names = [
+      "HTMLCanvasElement",
+      "CanvasRenderingContext2D",
+      "CanvasGradient",
+      "CanvasPattern",
+      "ImageBitmap",
+      "ImageData",
+      "TextMetrics",
+      "Path2D",
+    ];
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        return false;
+      }
+      return true;
+    });
+    collection["canvas"] = names;
+  }
+  {
+    console.log("---Web HID---");
+    let names = [
+      "HID",
+      "HIDDevice",
+      "HIDInputReportEvent",
+      "HIDConnectionEvent",
+    ];
+    globalNames = globalNames.filter((name) => {
+      if (names.includes(name)) {
+        return false;
+      }
+      return true;
+    });
+    collection["WebHID"] = names;
+  }
+  /* =================剩余的属性======================= */
   console.log("\n\nmatchedCollection:", collection);
   console.log("\n\n剩余的globalNames:", globalNames);
   // console.table(globalNames);
 })();
+
+/**
+ * 求差集
+ * @param {Array} arr 匹配的集合
+ * @param {Array} arr2 被匹配的集合
+ * @returns {Array} 差集
+ */
+function getComplement(arr1, arr2) {
+  return arr1.filter((item) => !arr2.includes(item));
+}

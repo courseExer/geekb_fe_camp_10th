@@ -1,0 +1,92 @@
+export const Web_Speech = [
+  {
+    name: "SpeechRecognition",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition",
+  },
+  {
+    name: "SpeechRecognitionAlternative",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognitionAlternative",
+  },
+  {
+    name: "SpeechRecognitionError",
+    type: "class",
+    status: "deprecated",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognitionError",
+  },
+  {
+    name: "SpeechRecognitionEvent",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognitionEvent",
+  },
+  {
+    name: "SpeechGrammar",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechGrammar",
+  },
+  {
+    name: "SpeechGrammarList",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechGrammarList",
+  },
+  {
+    name: "SpeechRecognitionResult",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognitionResult",
+  },
+  {
+    name: "SpeechRecognitionResultList",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognitionResultList",
+  },
+  {
+    name: "speechSynthesis",
+    type: "property",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis",
+  },
+  {
+    name: "SpeechSynthesis",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis",
+  },
+  {
+    name: "SpeechSynthesisErrorEvent",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisErrorEvent",
+  },
+  {
+    name: "SpeechSynthesisEvent",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisEvent",
+  },
+  {
+    name: "SpeechSynthesisUtterance",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance",
+  },
+  {
+    name: "SpeechSynthesisVoice",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisVoice",
+  },
+  {
+    name: "Window.speechSynthesis",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/Window/speechSynthesis",
+  },
+];
