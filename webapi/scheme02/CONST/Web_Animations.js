@@ -35,4 +35,16 @@ export const Web_Animations = [
     status: "normal",
     href: "",
   },
+  {
+    name: "CSSTransition",
+    type: "class",
+    status: "normal",
+    href: "",
+  },
+  {
+    name: "AnimationEffect",
+    type: "class",
+    status: "normal",
+    href: "",
+  },
 ];

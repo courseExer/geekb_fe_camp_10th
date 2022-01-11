@@ -1,6 +1,10 @@
 //
 
 const DOM = [
+  { name: "StaticRange" },
+  { name: "AbstractRange" },
+  { name: "AbortSignal" },
+  { name: "AbortController" },
   {
     name: "Attr",
     type: "class",

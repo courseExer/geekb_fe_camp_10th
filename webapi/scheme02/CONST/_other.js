@@ -100,11 +100,40 @@ export function WIN() {
     "originAgentCluster",
   ];
   const user_prompts = ["alert", "confirm", "prompt", "print", "postMessage"];
-
+  const medias = [
+    "origin",
+    "innerWidth",
+    "innerHeight",
+    "scrollX",
+    "pageXOffset",
+    "scrollY",
+    "pageYOffset",
+    "screenX",
+    "screenY",
+    "outerWidth",
+    "outerHeight",
+    "devicePixelRatio",
+    "offscreenBuffering",
+    "screenLeft",
+    "screenTop",
+    "defaultStatus",
+    "defaultstatus",
+    "styleMedia",
+    "moveBy",
+    "moveTo",
+    "resizeBy",
+    "resizeTo",
+    "scroll",
+    "scrollBy",
+    "scrollTo",
+    "screen"
+  ];
   return [
     ...current_browsing_context,
     ...other_browsing_contexts,
     ...the_user_agent,
+    ...user_prompts,
+    ...medias,
   ];
 }
 /* https://streams.spec.whatwg.org */

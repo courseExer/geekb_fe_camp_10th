@@ -1,5 +1,4 @@
 import * as mdn from "./CONST.js";
-import { Streams } from "./CONST.js";
 import { ECMA, WIN, STREAMS } from "./CONST/_other.js";
 
 let globalProps = Object.getOwnPropertyNames(window);
@@ -58,15 +57,22 @@ console.log("window的自身属性数量:", globalProps.length);
 // https://www.w3.org/TR/virtual-keyboard/#the-virtualkeyboard-interface
 {
   console.log("\n---VirtualKeyboard---");
-  delete globalProps.VirtualKeyboard;
+  globalProps = globalProps.filter((name) => {
+    if (name === "VirtualKeyboard") return false;
+    if (/keyboard/i.test(name)) return false;
+    return true;
+  });
 }
 // "InputDeviceCapabilities"
 // https://developer.mozilla.org/en-US/docs/Web/API/InputDeviceCapabilities_API#specifications
 {
   console.log("\n---InputDeviceCapabilities---");
-  delete globalProps.InputDeviceCapabilities;
+  globalProps = globalProps.filter((name) => {
+    if (name === "InputDeviceCapabilities") return false;
+    return true;
+  });
 }
-// mdn的webapi整理！
+// mdn的webapi按规范进行分类
 {
   console.log("\n---mdn的webapi规范---");
   const keys = Object.keys(mdn);
@@ -90,6 +96,21 @@ console.log("window的自身属性数量:", globalProps.length);
   });
   globalProps = globalProps.filter((name) => {
     return Shadow_DOM.includes(name) ? false : true;
+  });
+}
+
+// Trusted Types
+{
+  console.log("\n---Trusted Types---");
+  const foo = [
+    "TrustedHTML",
+    "TrustedScript",
+    "TrustedScriptURL",
+    "TrustedTypePolicy",
+    "TrustedTypePolicyFactory",
+  ];
+  globalProps = globalProps.filter((name) => {
+    return foo.includes(name) ? false : true;
   });
 }
 
@@ -119,47 +140,66 @@ console.log("window的自身属性数量:", globalProps.length);
   });
 }
 
-// 浏览器提供（实现）的功能
+// 待分类,按关键字
 {
   console.log("\n---browser,by apiName---");
-  const foo = [
-    "alert",
-    "confirm",
-    "cookieStore",
-    "CookieStore",
-    "CookieStoreManager",
-    "WebAssembly",
-    "Worklet",
-    "ResizeObserverSize",
-    "ReportingObserver",
-    "TrustedHTML",
-    "TrustedScript",
-    "TrustedScriptURL",
-    "TrustedTypePolicy",
-    "TrustedTypePolicyFactory",
-    "isTrusted",
-    "isSecureContext",
+  const known = [
     "escape", // deprecated
     "unescape", // deprecated
-    "LargestContentfulPaint",
-    "PerformanceServerTiming",
-    "PerformancePaintTiming",
-    "PerformanceObserverEntryList",
-    "PerformanceElementTiming",
     "FormData",
     "Option",
     "external", // deprecated
     "ElementInternals",
     "CompressionStream",
     "DecompressionStream",
+    "atob",
+    "btoa",
+    "cancelAnimationFrame",
+    "cancelIdleCallback",
+    "createImageBitmap",
+    "find",
+    "getComputedStyle",
+    "getSelection",
+    "matchMedia",
+    "queueMicrotask",
+    "requestAnimationFrame",
+    "requestIdleCallback",
+    "setInterval",
+    "setTimeout",
+    "clearInterval",
+    "clearTimeout",
+    "caches",
+    "WebAssembly",
+    "Worklet",
   ];
-
+  const unknown = [
+    "chrome",
+    "trustedTypes",
+    "isTrusted",
+    "isSecureContext",
+    "LargestContentfulPaint",
+    "NavigatorUAData",
+    "LockManager",
+    "Lock",
+    "UserActivation", // navigator.userActivation instanceof UserActivation // true
+    "FeaturePolicy", // document.featurePolicy
+    "GetParams",
+    "NavigatorManagedData",
+    "FragmentDirective", // document.fragmentDirective
+    "Serial",
+    "SerialPort",
+    "crossOriginIsolated",
+    "DelegatedInkTrailPresenter",
+    "Ink",
+    "_typeof2",
+  ];
+  const total = known.concat(...unknown);
   globalProps = globalProps.filter((name) => {
-    return foo.includes(name) ? false : true;
+    return total.includes(name) ? false : true;
   });
 }
 
-// 其他过滤，按关键字
+// 待分类，按正则
 {
   console.log("\n---other，by regexp---");
   const regExps = [
@@ -171,6 +211,7 @@ console.log("window的自身属性数量:", globalProps.length);
     /DOM/i,
     /^WebTransport/i,
     /^VTT/i,
+    /^__.+__$/i, // chrome extensions
   ];
   globalProps = globalProps.filter((name) => {
     for (let regExp of regExps) {
@@ -179,6 +220,6 @@ console.log("window的自身属性数量:", globalProps.length);
     return true;
   });
 }
+
 console.log("window的自身属性还剩下:", globalProps.length);
 console.dir(globalProps);
-window.globalProps = globalProps;

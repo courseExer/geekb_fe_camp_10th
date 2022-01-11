@@ -1,5 +1,6 @@
 //
 export const Performance = [
+  { name: "Profiler" },
   {
     name: "performance",
     type: "property",

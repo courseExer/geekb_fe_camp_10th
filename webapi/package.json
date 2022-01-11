@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "搜集webapi接口",
   "scripts": {
+    "test":"http-server ./ioTest",
     "start": "http-server ./scheme02"
   },
   "type": "module",

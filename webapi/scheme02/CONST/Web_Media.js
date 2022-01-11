@@ -1,4 +1,5 @@
-export const Web_Audio = [
+const Web_Audio = [
+  { name: "ConstantSourceNode" },
   {
     name: "Audio",
     type: "class",
@@ -248,7 +249,12 @@ export const Web_Audio = [
     status: "normal",
     href: "https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioCompletionEvent",
   },
-
-
-  
+];
+const Web_Video = [];
+export const Web_Media = [
+  ...Web_Audio,
+  ...Web_Video,
+  { name: "RemotePlayback" },
+  { name: "MediaStreamTrackGenerator" },
+  { name: "MediaStreamTrackProcessor" },
 ];

@@ -2,6 +2,12 @@
 
 export const CSS_Object_Model = [
   {
+    name: "CustomStateSet",
+    type: "class",
+    status: "normal",
+    href: "https://developer.mozilla.org/en-US/docs/Web/API/CustomStateSet",
+  },
+  {
     name: "AnimationEvent",
     type: "class",
     status: "normal",

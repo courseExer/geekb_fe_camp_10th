@@ -31,4 +31,22 @@ export const File = [
     status: "normal",
     href: "",
   },
+  {
+    name: "showDirectoryPicker",
+    type: "property",
+    status: "normal",
+    href: "",
+  },
+  {
+    name: "showOpenFilePicker",
+    type: "property",
+    status: "normal",
+    href: "",
+  },
+  {
+    name: "showSaveFilePicker",
+    type: "property",
+    status: "normal",
+    href: "",
+  },
 ];
